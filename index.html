@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#2a1766">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Dodo">
+<meta name="apple-mobile-web-app-title" content="Doudodo">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Dodo - suivi bébé</title>
+<title>Doudodo - sommeil de bébé</title>
 <style>
 :root{
   --bg:#f6f2ff; --card:#ffffff; --raised:#efe8ff; --text:#1f1440; --muted:#62577f; --line:#e6defa;
@@ -195,7 +195,7 @@ textarea{min-height:90px;resize:vertical}
 <nav id="nav"></nav>
 
 <script>
-const LOGO_SVG = "<svg viewBox=\"0 0 512 512\" aria-hidden=\"true\"><defs><linearGradient id=\"sky\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#9a6bff\"/><stop offset=\".55\" stop-color=\"#6a35e0\"/><stop offset=\"1\" stop-color=\"#3a168f\"/></linearGradient><radialGradient id=\"halo\"><stop offset=\".55\" stop-color=\"#fff\" stop-opacity=\".0\"/><stop offset=\".72\" stop-color=\"#fff\" stop-opacity=\".22\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></radialGradient><mask id=\"cr\"><rect width=\"512\" height=\"512\" fill=\"#000\"/><circle cx=\"250\" cy=\"262\" r=\"162\" fill=\"#fff\"/><circle cx=\"322\" cy=\"204\" r=\"140\" fill=\"#000\"/></mask></defs><rect width=\"512\" height=\"512\" fill=\"url(#sky)\"/><circle cx=\"250\" cy=\"262\" r=\"230\" fill=\"url(#halo)\"/><rect width=\"512\" height=\"512\" fill=\"#fff\" mask=\"url(#cr)\"/><circle cx=\"282\" cy=\"258\" r=\"74\" fill=\"#efe4ff\"/><path d=\"M268 190q-10-20 10-26\" fill=\"none\" stroke=\"#efe4ff\" stroke-width=\"10\" stroke-linecap=\"round\"/><circle cx=\"246\" cy=\"278\" r=\"11\" fill=\"#f2a3d3\" opacity=\".75\"/><circle cx=\"318\" cy=\"278\" r=\"11\" fill=\"#f2a3d3\" opacity=\".75\"/><path d=\"M250 256q11 10 22 0M292 256q11 10 22 0\" fill=\"none\" stroke=\"#5b2fc7\" stroke-width=\"7\" stroke-linecap=\"round\"/><path d=\"M273 284q9 7 18 0\" fill=\"none\" stroke=\"#5b2fc7\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M408 96l7 20 20 7-20 7-7 20-7-20-20-7 20-7z\" fill=\"#fff\"/><path d=\"M448 196l4 11 11 4-11 4-4 11-4-11-11-4 11-4z\" fill=\"#fff\" opacity=\".8\"/></svg>";
+const LOGO_SVG = "<svg viewBox=\"0 0 512 512\" aria-hidden=\"true\"><defs><linearGradient id=\"sky\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#9a6bff\"/><stop offset=\".55\" stop-color=\"#6a35e0\"/><stop offset=\"1\" stop-color=\"#3a168f\"/></linearGradient><radialGradient id=\"halo\"><stop offset=\".5\" stop-color=\"#fff\" stop-opacity=\".28\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></radialGradient><mask id=\"cr\"><rect width=\"512\" height=\"512\" fill=\"#000\"/><circle cx=\"256\" cy=\"272\" r=\"150\" fill=\"#fff\"/><circle cx=\"196\" cy=\"242\" r=\"150\" fill=\"#000\"/></mask></defs><rect width=\"512\" height=\"512\" fill=\"url(#sky)\"/><circle cx=\"256\" cy=\"272\" r=\"225\" fill=\"url(#halo)\"/><circle cx=\"146\" cy=\"160\" r=\"50\" fill=\"#fff\"/><circle cx=\"146\" cy=\"160\" r=\"26\" fill=\"#e6d8ff\"/><circle cx=\"366\" cy=\"160\" r=\"50\" fill=\"#e9dcff\"/><circle cx=\"366\" cy=\"160\" r=\"26\" fill=\"#cdb6ff\"/><circle cx=\"256\" cy=\"272\" r=\"150\" fill=\"#fff\"/><rect width=\"512\" height=\"512\" fill=\"#dccbff\" mask=\"url(#cr)\"/><circle cx=\"182\" cy=\"302\" r=\"16\" fill=\"#f2a3d3\" opacity=\".75\"/><circle cx=\"290\" cy=\"302\" r=\"16\" fill=\"#f2a3d3\" opacity=\".75\"/><path d=\"M188 269q16 15 33 0M251 269q16 15 33 0\" fill=\"none\" stroke=\"#5b2fc7\" stroke-width=\"10\" stroke-linecap=\"round\"/><path d=\"M222 311q14 10 27 0\" fill=\"none\" stroke=\"#5b2fc7\" stroke-width=\"9\" stroke-linecap=\"round\"/><path d=\"M432 68l7.840000000000001 20.16 20.16 7.840000000000001-20.16 7.840000000000001-7.840000000000001 20.16-7.840000000000001-20.16-20.16-7.840000000000001 20.16-7.840000000000001z\" fill=\"#fff\" opacity=\"1\"/><path d=\"M74 135l4.2 10.799999999999999 10.799999999999999 4.2-10.799999999999999 4.2-4.2 10.799999999999999-4.2-10.799999999999999-10.799999999999999-4.2 10.799999999999999-4.2z\" fill=\"#fff\" opacity=\"0.8\"/><path d=\"M440 397l3.6400000000000006 9.36 9.36 3.6400000000000006-9.36 3.6400000000000006-3.6400000000000006 9.36-3.6400000000000006-9.36-9.36-3.6400000000000006 9.36-3.6400000000000006z\" fill=\"#fff\" opacity=\"0.7\"/></svg>";
 // <LOGIC>
 const MIN = 60000, H = 3600000, DAY = 86400000;
 
@@ -497,7 +497,7 @@ function learnHTML(now){
   const l = learnInfo(now), name = esc(childName());
   if(l.pct >= 100) return `<div class="learn done"><span class="ic sleep">${icon('spark')}</span><span>Les horaires sont calculés d'après le rythme de ${name}.</span></div>`;
   return `<div class="learn">
-    <div class="head"><span class="ic sleep">${icon('spark')}</span><b>Dodo apprend le rythme de ${name}</b><span class="pct">${l.pct} %</span></div>
+    <div class="head"><span class="ic sleep">${icon('spark')}</span><b>Doudodo apprend le rythme de ${name}</b><span class="pct">${l.pct} %</span></div>
     <div class="bar" role="progressbar" aria-valuenow="${l.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(l.pct, 3)}%"></i></div>
     <div class="note">${l.got} sieste${l.got > 1 ? 's' : ''} analysée${l.got > 1 ? 's' : ''} sur ${l.total}. En attendant, les horaires proposés viennent des repères de son âge. Enregistre le réveil du matin et chaque sieste pour qu'ils deviennent personnels.</div></div>`;
 }
@@ -541,8 +541,8 @@ function skyHTML(p, now){
     else if(now <= p.to) st = '<span class="state now">C\'est le bon moment</span>';
     else st = `<span class="state late">Créneau dépassé de ${fmtD((now - p.to) / MIN)}</span>`;
     let why = p.w.n >= 3 ? `Calculé d'après ${p.w.n} ${p.bedtime ? 'couchers' : 'siestes'} de ${name}.`
-      : p.w.n > 0 ? 'Calculé surtout d\'après son âge, Dodo manque encore de données.'
-      : 'Calculé d\'après son âge. Dodo affinera avec tes saisies.';
+      : p.w.n > 0 ? 'Calculé surtout d\'après son âge, Doudodo manque encore de données.'
+      : 'Calculé d\'après son âge. Doudodo affinera avec tes saisies.';
     if(p.adjMin <= -5) why += ` Avancé de ${-p.adjMin} min car la dernière sieste a été courte.`;
     if(p.adjMin >= 5) why += ` Retardé de ${p.adjMin} min car la dernière sieste a été longue.`;
     const evening = new Date(now).getHours() >= 17;
@@ -560,7 +560,7 @@ function skyHTML(p, now){
       <p class="why">${why}</p></section>`;
   }
   return `<section class="sky">
-    <p class="lead">Bonjour ! Pour calculer la première sieste, Dodo a besoin de l'heure du réveil.</p>
+    <p class="lead">Bonjour ! Pour calculer la première sieste, Doudodo a besoin de l'heure du réveil.</p>
     <div class="time small">À quelle heure était le réveil de ${name} ce matin ?</div>
     <button class="cta" data-act="wake"><b>À l'instant</b><small>Enregistre le réveil à l'heure actuelle</small></button>
     <div class="ghosts"><button class="ghost" data-act="add" data-type="wake" data-lock="1">Plus tôt, choisir l'heure</button></div></section>`;
@@ -619,7 +619,7 @@ function homeHTML(){
   const age = ageText(S.child.birth);
   const lm = lastOf(e => e.type === 'bottle'), ld = lastOf(e => e.type === 'diaper'), lmed = lastOf(e => e.type === 'med' && now - e.start < DAY);
   const todayEv = eventsOfDay(today);
-  return `<header class="top">${LOGO_SVG}<div><div class="brand">${esc(S.child.name || 'Dodo')}</div>
+  return `<header class="top">${LOGO_SVG}<div><div class="brand">${esc(S.child.name || 'Doudodo')}</div>
       <div class="who">${age ? esc(age) : '<a href="#" data-act="tab" data-tab="set">Indique sa date de naissance</a>'}${syncBadge()}</div></div></header>
     ${warnHTML(now)}
     ${skyHTML(p, now)}
@@ -694,7 +694,7 @@ function statsHTML(){
     <div class="card">${acc.n >= 5 ? `<div class="big">${Math.round(acc.mae)} min d'écart</div>
       <p class="note" style="margin:6px 0 0">Écart moyen entre l'heure conseillée et le début réel, sur les ${acc.n} dernières siestes. ${acc.hit} % ont commencé dans le créneau conseillé. Ce chiffre est flatteur si tu suis les conseils de l'appli.</p>`
       : '<p class="note" style="margin:0">Pas encore assez de siestes enregistrées pour mesurer la fiabilité (il en faut au moins 5).</p>'}</div>
-    <h2>Ce que Dodo a appris</h2>
+    <h2>Ce que Doudodo a appris</h2>
     ${learnHTML(now)}
     <div class="card"><table><tr><th>Sieste</th><th>Éveil selon l'âge</th><th>Éveil observé</th><th>Durée de sieste</th></tr>${learn}</table>
     <p class="note" style="margin:10px 0 0">L'éveil est le temps passé réveillé avant la sieste. Rythme actuel : ${model.typicalNaps} sieste${model.typicalNaps > 1 ? 's' : ''} par jour. Coucher du soir habituel : ${model.bedClock.n ? clock(model.bedClock.mean) : 'pas encore connu (19:30 par défaut)'}. Réveil du matin habituel : ${model.wakeClock != null ? clock(model.wakeClock) : 'pas encore connu'}.</p></div>`;
@@ -711,17 +711,17 @@ function settingsHTML(){
     </div>
     <h2>Rappels</h2>
     <div class="card">
-      <div class="switch"><div><b>Prévenir avant la sieste</b><span class="note">${nOk === 'unsupported' ? 'Ce navigateur ne gère pas les notifications.' : nOk === 'denied' ? 'Notifications bloquées : autorise-les dans les réglages du téléphone pour Dodo.' : 'Une notification avant le créneau conseillé.'}</span></div>
+      <div class="switch"><div><b>Prévenir avant la sieste</b><span class="note">${nOk === 'unsupported' ? 'Ce navigateur ne gère pas les notifications.' : nOk === 'denied' ? 'Notifications bloquées : autorise-les dans les réglages du téléphone pour Doudodo.' : 'Une notification avant le créneau conseillé.'}</span></div>
         <button class="${S.settings.notif && nOk === 'granted' ? 'on' : ''}" data-act="notif" role="switch" aria-checked="${S.settings.notif && nOk === 'granted'}" aria-label="Prévenir avant la sieste"></button></div>
       <label>Combien de temps avant</label>
       <select id="s_lead">${[5,10,15,20,30].map(m => `<option value="${m}"${S.settings.lead === m ? ' selected' : ''}>${m} minutes avant</option>`).join('')}</select>
-      <div class="note" style="margin-top:8px">Le rappel part si Dodo est ouvert ou resté en arrière-plan récemment. Android peut le retarder ou le supprimer si l'appli est fermée depuis longtemps.</div>
+      <div class="note" style="margin-top:8px">Le rappel part si Doudodo est ouvert ou resté en arrière-plan récemment. Android peut le retarder ou le supprimer si l'appli est fermée depuis longtemps.</div>
     </div>
     <h2>Partage entre téléphones</h2>
     ${syncCardHTML()}
     <h2>Sauvegarde</h2>
     <div class="card">
-      <div class="note">${S.sync ? 'Sauvegarde automatique active : chaque saisie est copiée dans le foyer partagé.' : 'Les données sont enregistrées sur ce téléphone uniquement.'} Dodo garde aussi une copie automatique par jour sur ce téléphone.</div>
+      <div class="note">${S.sync ? 'Sauvegarde automatique active : chaque saisie est copiée dans le foyer partagé.' : 'Les données sont enregistrées sur ce téléphone uniquement.'} Doudodo garde aussi une copie automatique par jour sur ce téléphone.</div>
       ${snaps.map((s, i) => `<button class="btn sec small" data-act="restoresnap" data-i="${i}">Revenir à la copie du ${esc(s.day.split('-').reverse().slice(0, 2).join('/'))}</button>`).join('')}
       ${S.sync ? '<button class="btn sec small" data-act="synchistory">Récupérer tout l\'historique du foyer</button>' : ''}
       <button class="btn sec small" data-act="exportjson">Télécharger une sauvegarde</button>
@@ -858,7 +858,7 @@ function exportCSV(){
   const rows = [['type', 'debut', 'fin', 'duree_min', 'ml', 'detail', 'valeur', 'note']];
   S.events.slice().sort((a,b) => a.start - b.start).forEach(e => rows.push([
     e.type, loc(e.start), loc(e.end), e.end ? Math.round((e.end - e.start) / MIN) : '', e.ml ?? '', [e.kind, e.side].filter(Boolean).join(' '), e.val ?? '', e.note ?? '']));
-  download('dodo.csv', 'text/csv', '﻿' + rows.map(r => r.map(cell).join(';')).join('\n'));
+  download('doudodo.csv', 'text/csv', '﻿' + rows.map(r => r.map(cell).join(';')).join('\n'));
 }
 function importData(j, what){
   if(!j || !Array.isArray(j.events)){ toast('Fichier invalide'); return; }
@@ -1188,7 +1188,7 @@ function act(el){
   else if(a === 'prevday'){ const d = new Date(viewDay); d.setDate(d.getDate() - 1); viewDay = d.getTime(); render(); }
   else if(a === 'nextday'){ const d = new Date(viewDay); d.setDate(d.getDate() + 1); viewDay = Math.min(d.getTime(), startOfDay(now)); render(); }
   else if(a === 'notif') toggleNotif();
-  else if(a === 'exportjson') download('dodo-sauvegarde-' + toInput(now).slice(0, 10) + '.json', 'application/json', JSON.stringify({child: S.child, events: S.events}, null, 1));
+  else if(a === 'exportjson') download('doudodo-sauvegarde-' + toInput(now).slice(0, 10) + '.json', 'application/json', JSON.stringify({child: S.child, events: S.events}, null, 1));
   else if(a === 'exportcsv') exportCSV();
   else if(a === 'importjson') $('#importfile').click();
   else if(a === 'restoresnap'){ const s = snapshots()[+el.dataset.i]; if(s) importData(s, 'la copie du ' + s.day.split('-').reverse().slice(0, 2).join('/')); }
@@ -1197,7 +1197,7 @@ function act(el){
   else if(a === 'syncjoin') joinFamily($('#j_code') ? $('#j_code').value : '');
   else if(a === 'syncleave') leaveFamily();
   else if(a === 'synccopy'){ navigator.clipboard.writeText(S.sync.fid).then(() => toast('Code copié'), () => prompt('Copie ce code :', S.sync.fid)); }
-  else if(a === 'syncshare'){ navigator.share({text: 'Code Dodo : ' + S.sync.fid}).catch(() => {}); }
+  else if(a === 'syncshare'){ navigator.share({text: 'Code Doudodo : ' + S.sync.fid}).catch(() => {}); }
   else if(a === 'wipe'){
     if(S.sync){ toast("Quitte d'abord le foyer pour tout effacer"); return; }
     if(confirm('Effacer TOUTES les données de ce téléphone ? Pense à télécharger une sauvegarde avant.') && confirm('Vraiment tout effacer ?')){
