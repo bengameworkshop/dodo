@@ -1,5 +1,5 @@
-// Service worker de Dodo : permet l'ouverture hors ligne.
-const CACHE = 'dodo-v1';
+// Service worker de Dodo : ouverture hors ligne et clic sur les rappels.
+const CACHE = 'dodo-v2';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -36,4 +36,13 @@ self.addEventListener('fetch', e => {
       .then(res => remember(req, res))
       .catch(() => caches.match(req).then(hit => hit || caches.match('index.html')))
   );
+});
+
+// Un appui sur un rappel ouvre (ou ramène au premier plan) l'appli.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) if ('focus' in c) return c.focus();
+    return self.clients.openWindow('./');
+  }));
 });
