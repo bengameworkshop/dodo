@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dodo">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Dodo - suivi bébé</title>
+<style>
+:root{
+  --bg:#f5f6fb; --card:#ffffff; --text:#1c1d2b; --muted:#6b6f85; --line:#e4e6f0;
+  --accent:#4f46e5; --accent-soft:#e8e7fd; --ok:#16a34a; --warn:#d97706; --danger:#dc2626;
+  --sleep:#6366f1; --bottle:#f59e0b; --pee:#0ea5e9; --poop:#a16207;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#12131c; --card:#1c1e2c; --text:#eceef8; --muted:#9a9eb5; --line:#2b2e42; --accent:#818cf8; --accent-soft:#2a2c52; }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px}
+#app{max-width:640px;margin:0 auto;padding:16px 16px calc(84px + env(safe-area-inset-bottom))}
+h1{font-size:22px;margin:4px 0 2px}
+h2{font-size:15px;margin:22px 0 8px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.sub{color:var(--muted);font-size:14px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.status .big{font-size:26px;font-weight:700;margin:2px 0}
+.status .line{color:var(--muted);font-size:15px;margin:2px 0}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600;background:var(--accent-soft);color:var(--accent)}
+.pill.ok{background:#dcfce7;color:#15803d}.pill.warn{background:#fef3c7;color:#b45309}.pill.late{background:#fee2e2;color:#b91c1c}
+button{font:inherit;color:inherit;cursor:pointer;border:none}
+.btn{display:block;width:100%;padding:16px;border-radius:14px;background:var(--accent);color:#fff;font-weight:700;font-size:17px;margin-top:12px}
+.btn.sec{background:var(--accent-soft);color:var(--accent)}
+.btn.danger{background:#fee2e2;color:#b91c1c}
+.btn.small{padding:10px;font-size:15px;margin-top:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 8px;font-size:16px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px}
+.quick span{font-size:28px}
+.quick:active,.btn:active{transform:scale(.97)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row .ic{font-size:22px;width:32px;text-align:center}
+.row .t{font-weight:700;min-width:50px;font-variant-numeric:tabular-nums}
+.row .d{flex:1;font-size:15px}
+.row .d small{color:var(--muted);display:block}
+.row.click{cursor:pointer}
+.empty{color:var(--muted);text-align:center;padding:20px 0;font-size:15px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;background:none;padding:10px 0 8px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button span{font-size:22px}
+nav button.on{color:var(--accent);font-weight:700}
+.datenav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.datenav button{background:var(--card);border:1px solid var(--line);border-radius:12px;width:44px;height:44px;font-size:18px}
+.datenav .lbl{font-weight:700;text-align:center;flex:1}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 4px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);width:100%;max-width:640px;border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.sheet h3{margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600}
+input[type=text],input[type=number],input[type=date],input[type=datetime-local]{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:70px;padding:10px 6px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-weight:600;font-size:14px}
+.seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.stepper{display:flex;gap:8px;align-items:center}
+.stepper button{width:48px;height:48px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:22px;font-weight:700}
+.stepper input{text-align:center;font-size:20px;font-weight:700}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));background:#1f2033;color:#fff;padding:12px 16px;border-radius:14px;z-index:30;display:flex;gap:14px;align-items:center;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:92vw}
+.toast button{background:none;color:#a5b4fc;font-weight:700}
+.note{font-size:13px;color:var(--muted);line-height:1.45}
+.warnbox{background:#fef3c7;color:#92400e;border-radius:12px;padding:10px 12px;font-size:13px;margin-top:8px}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:15px;letter-spacing:.03em;word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="nav"></nav>
+
+<script>
+// <LOGIC>
+const MIN = 60000, DAY = 86400000;
+
+// [âge en mois, fenêtre d'éveil moyenne (min), siestes/jour, durée sieste moyenne (min)]
+// Valeurs indicatives d'après les repères courants sur le sommeil du nourrisson.
+// L'appli les remplace progressivement par ce qu'elle observe chez ton enfant.
+const AGE_TABLE = [
+  [0,50,5,50],[1,60,5,55],[2,75,4,60],[3,90,4,60],[4,105,4,60],[5,120,3,65],
+  [6,135,3,70],[8,160,3,70],[10,180,2,75],[12,195,2,80],[15,225,2,80],
+  [18,270,1,90],[24,300,1,90],[36,360,1,90]
+];
+const RANK_FACTOR = [0.8, 1, 1, 1.1, 1.2]; // 1re fenêtre du jour plus courte, dernière plus longue
+
+function startOfDay(ts){ const d = new Date(ts); d.setHours(0,0,0,0); return d.getTime(); }
+
+function ageMonths(birth, now){
+  if(!birth) return 4;
+  const b = new Date(birth + 'T00:00:00').getTime();
+  if(isNaN(b)) return 4;
+  return Math.max(0, (now - b) / (30.4375 * DAY));
+}
+
+function lerpTable(age, col){
+  const t = AGE_TABLE;
+  if(age <= t[0][0]) return t[0][col];
+  for(let i = 1; i < t.length; i++){
+    if(age <= t[i][0]){
+      const a = t[i-1], b = t[i];
+      return a[col] + (b[col] - a[col]) * (age - a[0]) / (b[0] - a[0]);
+    }
+  }
+  return t[t.length-1][col];
+}
+
+function defaultWindow(age, rank){ return lerpTable(age, 1) * RANK_FACTOR[Math.min(rank,5) - 1]; }
+function defaultDuration(age){ return lerpTable(age, 3); }
+
+function groupByDay(events){
+  const m = new Map();
+  for(const e of events){
+    if(e.type !== 'nap' && e.type !== 'wake') continue;
+    const ds = startOfDay(e.start);
+    if(!m.has(ds)) m.set(ds, {naps: [], wake: null});
+    const g = m.get(ds);
+    if(e.type === 'nap') g.naps.push(e);
+    else if(!g.wake || e.start < g.wake.start) g.wake = e;
+  }
+  for(const g of m.values()) g.naps.sort((a,b) => a.start - b.start);
+  return m;
+}
+
+function wstats(arr){
+  const sw = arr.reduce((s,x) => s + x.w, 0);
+  if(!sw) return null;
+  const mean = arr.reduce((s,x) => s + x.v * x.w, 0) / sw;
+  const vr = arr.reduce((s,x) => s + x.w * (x.v - mean) ** 2, 0) / sw;
+  return {mean, sd: Math.sqrt(vr), n: arr.length};
+}
+
+function buildModel(events, now, age){
+  const days = groupByDay(events), today = startOfDay(now);
+  const wins = [], durs = [], napCounts = [];
+  for(const [ds, g] of days){
+    const ago = Math.round((today - ds) / DAY);
+    if(ago < 0 || ago > 21) continue;
+    const w = Math.pow(0.9, ago);
+    g.naps.forEach((n, i) => {
+      const rank = Math.min(i + 1, 5);
+      const prevEnd = i === 0 ? (g.wake ? g.wake.start : null) : g.naps[i-1].end;
+      if(prevEnd != null){
+        const m = (n.start - prevEnd) / MIN;
+        if(m >= 20 && m <= 400) wins.push({rank, v: m, w});
+      }
+      if(n.end){
+        const dm = (n.end - n.start) / MIN;
+        if(dm >= 10 && dm <= 300) durs.push({rank, v: dm, w});
+      }
+    });
+    if(ago >= 1 && ago <= 14 && g.naps.length > 0) napCounts.push({v: g.naps.length, w});
+  }
+  const blend = (samples, rank, def, fallbackSd) => {
+    const st = wstats(samples.filter(s => s.rank === Math.min(rank,5)));
+    if(!st) return {mean: def, sd: fallbackSd, n: 0, def, learned: null};
+    const a = st.n / (st.n + 3);
+    return {mean: a * st.mean + (1 - a) * def, sd: st.n >= 3 ? st.sd : fallbackSd, n: st.n, def, learned: st.mean};
+  };
+  const nc = wstats(napCounts);
+  return {
+    age,
+    window: rank => blend(wins, rank, defaultWindow(age, rank), 15),
+    duration: rank => blend(durs, rank, defaultDuration(age), 15),
+    typicalNaps: nc && nc.n >= 3 ? Math.max(1, Math.round(nc.mean)) : Math.round(lerpTable(age, 2))
+  };
+}
+
+function predict(events, now, birth){
+  const age = ageMonths(birth, now);
+  const model = buildModel(events, now, age);
+  const g = groupByDay(events).get(startOfDay(now)) || {naps: [], wake: null};
+  const open = g.naps.find(n => !n.end);
+  if(open){
+    const rank = g.naps.indexOf(open) + 1;
+    const d = model.duration(rank);
+    return {state: 'sleeping', age, since: open.start, rank, wakeAt: open.start + d.mean * MIN, dur: d};
+  }
+  const done = g.naps.filter(n => n.end);
+  let ref = null;
+  if(done.length) ref = done[done.length-1].end;
+  if(g.wake) ref = ref == null ? g.wake.start : Math.max(ref, g.wake.start);
+  if(ref == null) return {state: 'noref', age};
+  const rank = done.length + 1;
+  const w = model.window(rank);
+  const center = ref + w.mean * MIN;
+  const spread = Math.min(25, Math.max(10, w.sd * 0.8)) * MIN;
+  return {
+    state: 'awake', age, ref, rank, center, from: center - spread, to: center + spread,
+    bedtime: rank > model.typicalNaps, typicalNaps: model.typicalNaps, w
+  };
+}
+// </LOGIC>
+
+// ---------- Stockage ----------
+const KEY = 'dodo.v1';
+function load(){
+  try{ const r = JSON.parse(localStorage.getItem(KEY)); if(r && Array.isArray(r.events)) return r; }catch(e){}
+  return {child: {name: '', birth: ''}, events: []};
+}
+let S = load();
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('⚠️ Sauvegarde impossible'); } }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function addEvent(e){ e.id = uid(); S.events.push(e); save(); markDirty(e.id, 'put'); return e.id; }
+function delEvent(id){ S.events = S.events.filter(e => e.id !== id); save(); markDirty(id, 'del'); }
+
+// ---------- Helpers ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const fmtT = ts => new Date(ts).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+const fmtD = m => { m = Math.round(m); return m < 60 ? m + ' min' : Math.floor(m/60) + 'h' + pad(m % 60); };
+const toInput = ts => { const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fromInput = s => new Date(s).getTime();
+const dayLabel = ts => {
+  const t = startOfDay(Date.now()), d = startOfDay(ts), diff = Math.round((t - d) / DAY);
+  if(diff === 0) return "Aujourd'hui"; if(diff === 1) return 'Hier';
+  return new Date(ts).toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'});
+};
+function ageText(birth){
+  if(!birth) return '';
+  const b = new Date(birth + 'T00:00:00'), n = new Date();
+  let m = (n.getFullYear() - b.getFullYear()) * 12 + n.getMonth() - b.getMonth();
+  let d = n.getDate() - b.getDate();
+  if(d < 0){ m--; d += new Date(n.getFullYear(), n.getMonth(), 0).getDate(); }
+  if(m < 0) return '';
+  if(m < 1) return d + ' jour' + (d > 1 ? 's' : '');
+  if(m >= 24){ const y = Math.floor(m / 12), r = m % 12; return y + ' ans' + (r ? ' et ' + r + ' mois' : ''); }
+  return m + ' mois' + (d ? ' et ' + d + ' jour' + (d > 1 ? 's' : '') : '');
+}
+const lastMl = () => { const b = S.events.filter(e => e.type === 'bottle').sort((a,b) => b.start - a.start)[0]; return b ? b.ml : 120; };
+const diaperLabel = k => ({pee: 'Pipi', poop: 'Caca', both: 'Pipi + caca'}[k] || 'Couche');
+
+function eventInfo(e){
+  if(e.type === 'nap'){
+    if(!e.end) return {ic: '😴', main: 'Sieste en cours', sub: 'depuis ' + fmtT(e.start)};
+    return {ic: '😴', main: 'Sieste ' + fmtD((e.end - e.start) / MIN), sub: fmtT(e.start) + ' → ' + fmtT(e.end)};
+  }
+  if(e.type === 'wake') return {ic: '☀️', main: 'Réveil du matin', sub: ''};
+  if(e.type === 'bottle') return {ic: '🍼', main: 'Biberon ' + e.ml + ' ml', sub: ''};
+  if(e.type === 'diaper') return {ic: e.kind === 'pee' ? '💧' : e.kind === 'poop' ? '💩' : '💧💩', main: diaperLabel(e.kind), sub: ''};
+  return {ic: '•', main: e.type, sub: ''};
+}
+function eventsOfDay(ds){
+  return S.events.filter(e => startOfDay(e.start) === ds).sort((a,b) => a.start - b.start);
+}
+function rowsHTML(list){
+  if(!list.length) return '<div class="empty">Rien d\'enregistré pour le moment</div>';
+  return list.map(e => {
+    const i = eventInfo(e);
+    const stale = e.type === 'nap' && !e.end && startOfDay(e.start) !== startOfDay(Date.now());
+    return `<div class="row click" data-act="edit" data-id="${e.id}">
+      <div class="ic">${i.ic}</div><div class="t">${fmtT(e.start)}</div>
+      <div class="d">${esc(i.main)}${i.sub ? `<small>${esc(i.sub)}</small>` : ''}${stale ? '<small style="color:var(--danger)">⚠️ Sans heure de fin, à corriger</small>' : ''}</div></div>`;
+  }).join('');
+}
+
+// ---------- UI ----------
+let tab = 'home', viewDay = startOfDay(Date.now());
+
+function render(){
+  const app = $('#app');
+  if(tab === 'home') app.innerHTML = homeHTML();
+  else if(tab === 'log') app.innerHTML = logHTML();
+  else if(tab === 'stats') app.innerHTML = statsHTML();
+  else app.innerHTML = settingsHTML();
+  $('#nav').innerHTML = [['home','🏠','Accueil'],['log','📋','Journal'],['stats','📊','Stats'],['set','⚙️','Réglages']]
+    .map(([k,i,l]) => `<button class="${tab===k?'on':''}" data-act="tab" data-tab="${k}"><span>${i}</span>${l}</button>`).join('');
+}
+
+function homeHTML(){
+  const now = Date.now(), p = predict(S.events, now, S.child.birth);
+  const name = S.child.name || 'Bébé';
+  let status = '';
+  if(p.state === 'sleeping'){
+    status = `<div class="status card">
+      <span class="pill">Sieste n°${p.rank}</span>
+      <div class="big">😴 Dort depuis ${fmtT(p.since)}</div>
+      <div class="line">${fmtD((now - p.since) / MIN)} de sommeil</div>
+      <div class="line">Réveil habituel vers ${fmtT(p.wakeAt)} (durée moyenne ${fmtD(p.dur.mean)})</div>
+      <button class="btn" data-act="endnap">☀️ Réveil de la sieste</button></div>`;
+  } else if(p.state === 'awake'){
+    const diff = (p.center - now) / MIN;
+    let pill;
+    if(now < p.from) pill = `<span class="pill">dans ${fmtD(diff)}</span>`;
+    else if(now <= p.to) pill = '<span class="pill ok">C\'est le moment !</span>';
+    else pill = `<span class="pill late">dépassé de ${fmtD((now - p.to) / MIN)}</span>`;
+    const basis = p.w.n >= 3 ? `Basé sur ${p.w.n} observations (moyenne apprise ${fmtD(p.w.learned)})`
+      : p.w.n > 0 ? `Encore peu de données (${p.w.n}), mélangé avec les valeurs par âge`
+      : 'Estimation selon l\'âge, elle s\'affinera avec tes saisies';
+    status = `<div class="status card">
+      <span class="pill" style="background:transparent;padding:0;color:var(--muted)">Éveillé depuis ${fmtT(p.ref)} (${fmtD((now - p.ref) / MIN)})</span>
+      <div class="line" style="margin-top:8px">${p.bedtime ? '🌙 Coucher du soir probable' : '💤 Prochaine sieste (n°' + p.rank + ')'}</div>
+      <div class="big">${fmtT(p.from)} – ${fmtT(p.to)}</div>
+      <div style="margin:6px 0">${pill}</div>
+      <div class="note">${basis}</div>
+      <button class="btn" data-act="startnap">😴 Début de sieste</button></div>`;
+  } else {
+    status = `<div class="status card">
+      <div class="big">Pas encore de repère</div>
+      <div class="line">Enregistre le réveil du matin ou une sieste pour obtenir une prédiction.</div>
+      <button class="btn" data-act="wake">☀️ Réveil du matin (maintenant)</button>
+      <button class="btn sec small" data-act="add" data-type="wake">Choisir l'heure du réveil</button></div>`;
+  }
+  const todayEv = eventsOfDay(startOfDay(now));
+  const naps = todayEv.filter(e => e.type === 'nap');
+  const sleepMin = naps.reduce((s,e) => s + ((e.end || now) - e.start) / MIN, 0);
+  const ml = todayEv.filter(e => e.type === 'bottle').reduce((s,e) => s + e.ml, 0);
+  const nb = todayEv.filter(e => e.type === 'bottle').length;
+  const dp = todayEv.filter(e => e.type === 'diaper');
+  const sum = `${naps.length} sieste${naps.length > 1 ? 's' : ''} (${fmtD(sleepMin)}) · ${nb} biberon${nb > 1 ? 's' : ''} (${ml} ml) · ${dp.length} couche${dp.length > 1 ? 's' : ''}`;
+  const last = todayEv.slice(-5).reverse();
+  return `<h1>${esc(name)}</h1><div class="sub">${esc(ageText(S.child.birth)) || '<a href="#" data-act="tab" data-tab="set">Renseigne la date de naissance</a>'}${syncBadge()}</div>
+    ${status}
+    <div class="grid">
+      <button class="quick" data-act="bottle"><span>🍼</span>Biberon</button>
+      <button class="quick" data-act="diaper" data-kind="pee"><span>💧</span>Pipi</button>
+      <button class="quick" data-act="diaper" data-kind="poop"><span>💩</span>Caca</button>
+      <button class="quick" data-act="diaper" data-kind="both"><span>💧💩</span>Pipi + caca</button>
+    </div>
+    <h2>Aujourd'hui</h2><div class="note" style="margin-bottom:8px">${sum}</div>
+    <div class="card" style="padding:4px 12px">${rowsHTML(last)}</div>`;
+}
+
+function logHTML(){
+  const list = eventsOfDay(viewDay);
+  return `<h1>Journal</h1>
+    <div class="datenav"><button data-act="prevday">◀</button><div class="lbl">${esc(dayLabel(viewDay))}</div><button data-act="nextday">▶</button></div>
+    <div class="card" style="padding:4px 12px">${rowsHTML(list)}</div>
+    <button class="btn" data-act="add" data-type="nap" data-day="${viewDay}">＋ Ajouter un évènement</button>`;
+}
+
+function statsHTML(){
+  const now = Date.now(), today = startOfDay(now);
+  let rows = '';
+  for(let i = 0; i < 7; i++){
+    const ds = new Date(today); ds.setDate(ds.getDate() - i);
+    const ev = eventsOfDay(ds.getTime());
+    const naps = ev.filter(e => e.type === 'nap');
+    const sl = naps.reduce((s,e) => s + ((e.end || now) - e.start) / MIN, 0);
+    const ml = ev.filter(e => e.type === 'bottle').reduce((s,e) => s + e.ml, 0);
+    const dp = ev.filter(e => e.type === 'diaper').length;
+    rows += `<tr><td>${esc(dayLabel(ds.getTime()).replace(/^(\w{3})\w*/, '$1'))}</td><td>${naps.length}</td><td>${naps.length ? fmtD(sl) : '-'}</td><td>${ml || '-'}</td><td>${dp || '-'}</td></tr>`;
+  }
+  const age = ageMonths(S.child.birth, now), model = buildModel(S.events, now, age);
+  let learn = '';
+  for(let r = 1; r <= 5; r++){
+    const w = model.window(r), d = model.duration(r);
+    learn += `<tr><td>${r === 5 ? '5+' : r}</td><td>${fmtD(w.def)}</td><td>${w.learned != null ? fmtD(w.learned) : '-'}</td><td>${w.n}</td><td>${fmtD(w.mean)}</td><td>${fmtD(d.mean)}</td></tr>`;
+  }
+  return `<h1>Stats</h1><div class="sub">7 derniers jours</div>
+    <div class="card"><table><tr><th>Jour</th><th>Siestes</th><th>Sommeil</th><th>Biberons ml</th><th>Couches</th></tr>${rows}</table></div>
+    <h2>Ce que l'appli a appris</h2>
+    <div class="card"><table><tr><th>Sieste n°</th><th>Éveil par âge</th><th>Éveil observé</th><th>Obs.</th><th>Éveil utilisé</th><th>Durée sieste</th></tr>${learn}</table>
+    <div class="note" style="margin-top:10px">« Éveil » = temps entre le réveil (matin ou fin de la sieste précédente) et le début de la sieste. Plus il y a d'observations, plus la prédiction se base sur ton enfant et moins sur les valeurs par âge. Nombre de siestes typique actuel : ${model.typicalNaps}/jour.</div></div>`;
+}
+
+function settingsHTML(){
+  return `<h1>Réglages</h1>
+    <div class="card">
+      <label>Prénom</label><input type="text" id="s_name" value="${esc(S.child.name)}" placeholder="Prénom de l'enfant">
+      <label>Date de naissance</label><input type="date" id="s_birth" value="${esc(S.child.birth)}">
+      <div class="note" style="margin-top:8px">${esc(ageText(S.child.birth))}</div>
+    </div>
+    <h2>Synchronisation</h2>
+    ${syncCardHTML()}
+    <h2>Données</h2>
+    <div class="card">
+      <div class="note">Tout est stocké uniquement sur cet appareil (navigateur). Fais un export de temps en temps pour avoir une sauvegarde.</div>
+      <button class="btn sec small" data-act="exportjson">⬇️ Exporter (JSON, sauvegarde)</button>
+      <button class="btn sec small" data-act="exportcsv">⬇️ Exporter (CSV, tableur)</button>
+      <button class="btn sec small" data-act="importjson">⬆️ Importer une sauvegarde JSON</button>
+      <input type="file" id="importfile" accept="application/json,.json" style="display:none">
+      <button class="btn danger small" data-act="wipe">🗑️ Tout effacer</button>
+    </div>
+    <div class="note" style="text-align:center;margin-top:16px">${S.events.length} évènement(s) enregistré(s)</div>`;
+}
+
+// ---------- Toast ----------
+let toastTimer;
+function toast(msg, undo){
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast';
+  t.innerHTML = `<span>${esc(msg)}</span>${undo ? '<button>Annuler</button>' : ''}`;
+  if(undo) t.querySelector('button').onclick = () => { undo(); t.remove(); render(); };
+  document.body.appendChild(t);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 5000);
+}
+
+// ---------- Éditeur (ajout / modification) ----------
+function closeModal(){ document.querySelectorAll('.overlay').forEach(o => o.remove()); render(); }
+
+function openEditor(id, preset){
+  const existing = id ? S.events.find(e => e.id === id) : null;
+  const base = preset && preset.day ? Math.min(Date.now(), preset.day + 12 * 3600000) : Date.now();
+  const d = existing ? {...existing} : {type: (preset && preset.type) || 'nap', start: base, end: null, ml: lastMl(), kind: 'pee'};
+  const ov = document.createElement('div'); ov.className = 'overlay'; document.body.appendChild(ov);
+  ov.addEventListener('click', ev => { if(ev.target === ov) closeModal(); });
+
+  const sync = () => {
+    const s = ov.querySelector('#f_start'); if(s && s.value) d.start = fromInput(s.value);
+    const e = ov.querySelector('#f_end'); if(e) d.end = e.value ? fromInput(e.value) : null;
+    const m = ov.querySelector('#f_ml'); if(m) d.ml = Math.max(0, parseInt(m.value) || 0);
+  };
+  const draw = () => {
+    const types = [['nap','😴 Sieste'],['wake','☀️ Réveil'],['bottle','🍼 Biberon'],['diaper','💧 Couche']];
+    ov.innerHTML = `<div class="sheet"><h3>${existing ? 'Modifier' : 'Ajouter'}</h3>
+      ${existing ? '' : `<div class="seg">${types.map(([k,l]) => `<button data-t="${k}" class="${d.type===k?'on':''}">${l}</button>`).join('')}</div>`}
+      <label>${d.type === 'nap' ? 'Début' : 'Heure'}</label><input type="datetime-local" id="f_start" value="${toInput(d.start)}">
+      ${d.type === 'nap' ? `<label>Fin (vide = sieste en cours)</label><input type="datetime-local" id="f_end" value="${d.end ? toInput(d.end) : ''}">` : ''}
+      ${d.type === 'bottle' ? `<label>Quantité (ml)</label><div class="stepper"><button data-ml="-10">−</button><input type="number" id="f_ml" inputmode="numeric" value="${d.ml}"><button data-ml="10">+</button></div>` : ''}
+      ${d.type === 'diaper' ? `<label>Type</label><div class="seg">${[['pee','💧 Pipi'],['poop','💩 Caca'],['both','Les deux']].map(([k,l]) => `<button data-k="${k}" class="${d.kind===k?'on':''}">${l}</button>`).join('')}</div>` : ''}
+      <button class="btn" id="f_save">Enregistrer</button>
+      ${existing ? '<button class="btn danger small" id="f_del">Supprimer</button>' : ''}
+      <button class="btn sec small" id="f_cancel">Annuler</button></div>`;
+    ov.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { sync(); d.type = b.dataset.t; draw(); });
+    ov.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { sync(); d.kind = b.dataset.k; draw(); });
+    ov.querySelectorAll('[data-ml]').forEach(b => b.onclick = () => { sync(); d.ml = Math.max(0, d.ml + parseInt(b.dataset.ml)); ov.querySelector('#f_ml').value = d.ml; });
+    ov.querySelector('#f_cancel').onclick = closeModal;
+    if(existing) ov.querySelector('#f_del').onclick = () => { if(confirm('Supprimer cet évènement ?')){ delEvent(existing.id); closeModal(); } };
+    ov.querySelector('#f_save').onclick = () => {
+      sync();
+      if(d.type === 'nap' && d.end && d.end <= d.start){ toast('La fin doit être après le début'); return; }
+      if(d.type === 'bottle' && !d.ml){ toast('Indique une quantité'); return; }
+      const clean = {type: d.type, start: d.start};
+      if(d.type === 'nap') clean.end = d.end || null;
+      if(d.type === 'bottle') clean.ml = d.ml;
+      if(d.type === 'diaper') clean.kind = d.kind;
+      if(existing){ const i = S.events.findIndex(e => e.id === existing.id); S.events[i] = {id: existing.id, ...clean}; save(); markDirty(existing.id, 'put'); }
+      else addEvent(clean);
+      closeModal();
+    };
+  };
+  draw();
+}
+
+// ---------- Export / import ----------
+function download(name, mime, text){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type: mime}));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+function exportCSV(){
+  const iso = t => t ? new Date(t).toISOString() : '';
+  const rows = [['type','debut','fin','duree_min','ml','couche']];
+  S.events.slice().sort((a,b) => a.start - b.start).forEach(e => rows.push([
+    e.type, new Date(e.start - new Date(e.start).getTimezoneOffset()*MIN).toISOString().slice(0,19),
+    e.end ? new Date(e.end - new Date(e.end).getTimezoneOffset()*MIN).toISOString().slice(0,19) : '',
+    e.end ? Math.round((e.end - e.start) / MIN) : '', e.ml ?? '', e.kind ?? '']));
+  download('dodo.csv', 'text/csv', rows.map(r => r.join(';')).join('\n'));
+}
+
+// ---------- Synchro entre téléphones (Firebase Firestore, facultative) ----------
+// <SYNCLOGIC>
+const CODE_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
+function newFamilyCode(rand){
+  rand = rand || (n => { const a = new Uint32Array(n); crypto.getRandomValues(a); return Array.from(a); });
+  let s = '';
+  for(const x of rand(20)) s += CODE_ALPHABET[x % CODE_ALPHABET.length];
+  return s.match(/.{4}/g).join('-');
+}
+function normalizeCode(input){
+  const s = String(input || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if(s.length !== 20 || [...s].some(c => !CODE_ALPHABET.includes(c))) return null;
+  return s.match(/.{4}/g).join('-');
+}
+const sigEvent = e => [e.type, e.start, e.end ?? '', e.ml ?? '', e.kind ?? ''].join('|');
+function toDoc(e){
+  const d = {type: e.type, start: e.start};
+  if(e.type === 'nap') d.end = e.end ?? null;
+  if(e.type === 'bottle') d.ml = e.ml;
+  if(e.type === 'diaper') d.kind = e.kind;
+  return d;
+}
+function fromDoc(id, d){
+  if(!d || !['nap', 'wake', 'bottle', 'diaper'].includes(d.type) || typeof d.start !== 'number') return null;
+  const e = {id, type: d.type, start: d.start};
+  if(d.type === 'nap') e.end = d.end ?? null;
+  if(d.type === 'bottle') e.ml = d.ml;
+  if(d.type === 'diaper') e.kind = d.kind;
+  return e;
+}
+// changes: [{type:'added'|'modified'|'removed', id, data}] ; skipIds = évènements locaux pas encore envoyés
+function applyRemote(events, changes, since, skipIds){
+  let changed = false;
+  for(const ch of changes){
+    if(skipIds && skipIds[ch.id]) continue;
+    const i = events.findIndex(e => e.id === ch.id);
+    if(ch.type === 'removed'){
+      if(i >= 0 && events[i].start >= since){ events.splice(i, 1); changed = true; }
+      continue;
+    }
+    const ev = fromDoc(ch.id, ch.data);
+    if(!ev) continue;
+    if(i < 0){ events.push(ev); changed = true; }
+    else if(sigEvent(events[i]) !== sigEvent(ev)){ events[i] = ev; changed = true; }
+  }
+  return changed;
+}
+// </SYNCLOGIC>
+
+// Colle ici la configuration web de ton projet Firebase (console Firebase > Paramètres du projet > Vos applications).
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyBtbO67SeR48ZNNIDQHaWD4VVDrgtpgXuw',
+  authDomain: 'dodo-bebe.firebaseapp.com',
+  projectId: 'dodo-bebe',
+  storageBucket: 'dodo-bebe.firebasestorage.app',
+  messagingSenderId: '612628829195',
+  appId: '1:612628829195:web:2a401c80ef9a57604ea30e'
+};
+const FB_VER = '10.14.1', SYNC_DAYS = 30;
+const SY = {state: 'off', msg: '', db: null, m: null, unsubs: []};
+const syncAvailable = () => !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('délai dépassé'), {code: 'timeout'})), ms))]);
+
+function syncStatusText(){
+  return ({off: 'Non synchronisé', connecting: 'Connexion en cours…', ok: 'Synchronisé',
+    offline: 'Hors ligne : les saisies partiront au retour du réseau', error: 'Erreur de synchro : ' + SY.msg})[SY.state] || '';
+}
+function syncBadge(){
+  if(!S.sync) return '';
+  const t = {connecting: '☁️ connexion…', ok: '☁️ synchronisé', offline: '☁️ hors ligne', error: '⚠️ erreur de synchro'}[SY.state];
+  return t ? ' · ' + t : '';
+}
+function setSync(state, msg){
+  msg = msg || '';
+  if(SY.state === state && SY.msg === msg) return;
+  SY.state = state; SY.msg = msg;
+  const el = document.getElementById('syncstatus'); if(el) el.textContent = syncStatusText();
+  if(tab === 'home' && !document.querySelector('.overlay')) render();
+}
+function syncCardHTML(){
+  if(!syncAvailable()) return '<div class="card"><div class="note">La synchronisation entre téléphones n\'est pas encore configurée dans ce fichier (configuration Firebase manquante).</div></div>';
+  if(S.sync) return `<div class="card">
+    <div class="note">Foyer synchronisé. Pour l'autre personne : Réglages, « Rejoindre un foyer », avec ce code :</div>
+    <div class="mono">${esc(S.sync.fid)}</div>
+    <div class="note" id="syncstatus">${esc(syncStatusText())}</div>
+    <button class="btn sec small" data-act="synccopy">📋 Copier le code</button>
+    ${navigator.share ? '<button class="btn sec small" data-act="syncshare">📤 Partager le code</button>' : ''}
+    <button class="btn danger small" data-act="syncleave">Quitter le foyer</button></div>`;
+  return `<div class="card">
+    <div class="note">Pour partager les données avec une autre personne, crée un foyer puis donne-lui le code. Les données sont envoyées chez Google (Firebase) et quiconque a le code peut les lire et les modifier.</div>
+    <button class="btn small" data-act="synccreate">☁️ Créer un foyer</button>
+    <label>Ou rejoindre un foyer existant</label>
+    <input type="text" id="j_code" placeholder="xxxx-xxxx-xxxx-xxxx-xxxx" autocapitalize="off" autocomplete="off" spellcheck="false">
+    <button class="btn sec small" data-act="syncjoin">Rejoindre</button></div>`;
+}
+
+async function loadFirebase(){
+  if(SY.m && SY.db) return;
+  const base = 'https://www.gstatic.com/firebasejs/' + FB_VER + '/';
+  const [appM, fs] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-firestore.js')]);
+  const app = appM.initializeApp(FIREBASE_CONFIG);
+  let db;
+  try{ db = fs.initializeFirestore(app, {localCache: fs.persistentLocalCache({tabManager: fs.persistentMultipleTabManager()})}); }
+  catch(e){ db = fs.getFirestore(app); }
+  SY.m = fs; SY.db = db;
+}
+
+// Les modifications locales sont notées « à envoyer » (et conservées sur le téléphone) jusqu'à confirmation du serveur.
+function markDirty(id, op){
+  if(!S.sync) return;
+  S.sync.dirty = S.sync.dirty || {};
+  S.sync.dirty[id] = {op, v: Date.now() + Math.random()};
+  save();
+  flushOne(id);
+}
+function flushOne(id){
+  if(!S.sync || !SY.m || !SY.db) return;
+  const d = S.sync.dirty && S.sync.dirty[id];
+  if(!d) return;
+  const {m, db} = SY, ref = m.doc(db, 'families', S.sync.fid, 'events', id);
+  let p;
+  if(d.op === 'del') p = m.deleteDoc(ref);
+  else {
+    const e = S.events.find(x => x.id === id);
+    if(!e){ delete S.sync.dirty[id]; save(); return; }
+    p = m.setDoc(ref, toDoc(e));
+  }
+  p.then(() => {
+    const cur = S.sync && S.sync.dirty && S.sync.dirty[id];
+    if(cur && cur.v === d.v){ delete S.sync.dirty[id]; save(); }
+  }).catch(err => setSync('error', (err && err.code) || 'écriture refusée'));
+}
+function flushAll(){ if(S.sync && S.sync.dirty) Object.keys(S.sync.dirty).forEach(flushOne); }
+
+let profTimer;
+function syncProfile(){
+  if(!S.sync || !SY.m || !SY.db) return;
+  clearTimeout(profTimer);
+  profTimer = setTimeout(() => {
+    const {m, db} = SY;
+    m.setDoc(m.doc(db, 'families', S.sync.fid), {name: S.child.name || '', birth: S.child.birth || ''})
+      .catch(err => setSync('error', (err && err.code) || 'écriture refusée'));
+  }, 600);
+}
+
+function stopSync(){
+  SY.unsubs.forEach(f => { try{ f(); }catch(e){} });
+  SY.unsubs = [];
+  setSync('off');
+}
+
+async function startSync(fid){
+  stopSync();
+  setSync('connecting');
+  try{
+    await loadFirebase();
+    const {m, db} = SY;
+    const since = startOfDay(Date.now()) - SYNC_DAYS * DAY;
+    const onErr = err => {
+      console.error(err);
+      setSync('error', err && err.code === 'permission-denied' ? 'accès refusé (règles Firestore ?)' : (err && err.code) || 'inconnue');
+    };
+    const evQuery = m.query(m.collection(db, 'families', fid, 'events'), m.where('start', '>=', since));
+    SY.unsubs.push(m.onSnapshot(evQuery, {includeMetadataChanges: true}, snap => {
+      const changes = snap.docChanges().map(c => ({type: c.type, id: c.doc.id, data: c.doc.data()}));
+      if(applyRemote(S.events, changes, since, S.sync && S.sync.dirty)){
+        save();
+        if(!document.querySelector('.overlay') && tab !== 'set') render();
+      }
+      setSync(snap.metadata.fromCache ? 'offline' : 'ok');
+    }, onErr));
+    SY.unsubs.push(m.onSnapshot(m.doc(db, 'families', fid), snap => {
+      const d = snap.data();
+      if(!d) return;
+      const nm = d.name || '', bd = d.birth || '';
+      if(nm !== S.child.name || bd !== S.child.birth){
+        S.child.name = nm; S.child.birth = bd; save();
+        if(!document.querySelector('.overlay') && tab !== 'set') render();
+      }
+    }, onErr));
+    flushAll();
+  }catch(e){
+    console.error(e);
+    setSync('error', 'chargement impossible (pas de réseau ?)');
+  }
+}
+
+async function createFamily(){
+  if(!syncAvailable()){ toast('Synchro non configurée'); return; }
+  const fid = newFamilyCode();
+  try{
+    toast('Création du foyer…');
+    await withTimeout(loadFirebase(), 15000);
+    const {m, db} = SY;
+    await withTimeout(m.setDoc(m.doc(db, 'families', fid), {name: S.child.name || '', birth: S.child.birth || ''}), 15000);
+    const evs = S.events.filter(e => fromDoc(e.id, e));
+    for(let i = 0; i < evs.length; i += 400){
+      const b = m.writeBatch(db);
+      evs.slice(i, i + 400).forEach(e => b.set(m.doc(db, 'families', fid, 'events', e.id), toDoc(e)));
+      await withTimeout(b.commit(), 20000);
+    }
+    S.sync = {fid, dirty: {}}; save();
+    await startSync(fid);
+    render();
+    toast('Foyer créé : donne le code à l\'autre personne');
+  }catch(e){
+    console.error(e);
+    toast('Création impossible (' + (e.code || e.message) + ')');
+  }
+}
+
+async function joinFamily(input){
+  if(!syncAvailable()){ toast('Synchro non configurée'); return; }
+  const fid = normalizeCode(input);
+  if(!fid){ toast('Code invalide : 20 caractères attendus'); return; }
+  if(S.events.length && !confirm('Les ' + S.events.length + ' évènements déjà présents sur ce téléphone seront ajoutés au foyer. Continuer ?')) return;
+  try{
+    toast('Connexion au foyer…');
+    await withTimeout(loadFirebase(), 15000);
+    const {m, db} = SY;
+    const snap = await withTimeout(m.getDocFromServer(m.doc(db, 'families', fid)), 15000);
+    if(!snap.exists()){ toast('Code inconnu'); return; }
+    S.sync = {fid, dirty: {}};
+    S.events.forEach(e => { S.sync.dirty[e.id] = {op: 'put', v: Date.now() + Math.random()}; });
+    save();
+    await startSync(fid);
+    render();
+    toast('Foyer rejoint');
+  }catch(e){
+    console.error(e);
+    toast('Connexion impossible (' + (e.code || e.message) + ')');
+  }
+}
+
+function leaveFamily(){
+  if(!confirm('Quitter le foyer ? Les données restent sur ce téléphone mais ne sont plus synchronisées.')) return;
+  stopSync(); S.sync = null; save(); render();
+}
+
+window.addEventListener('online', () => {
+  if(S.sync && syncAvailable() && (SY.state === 'error' || !SY.unsubs.length)) startSync(S.sync.fid);
+});
+
+// ---------- Actions ----------
+function act(el){
+  const a = el.dataset.act;
+  if(a === 'tab'){ tab = el.dataset.tab; if(tab === 'log') viewDay = startOfDay(Date.now()); render(); }
+  else if(a === 'startnap'){ const id = addEvent({type: 'nap', start: Date.now(), end: null}); render(); toast('Sieste démarrée', () => delEvent(id)); }
+  else if(a === 'endnap'){
+    const g = groupByDay(S.events).get(startOfDay(Date.now()));
+    const open = g && g.naps.find(n => !n.end);
+    if(open){ open.end = Date.now(); if(open.end - open.start < MIN) open.end = open.start + MIN; save(); markDirty(open.id, 'put'); render(); toast('Sieste terminée', () => { open.end = null; save(); markDirty(open.id, 'put'); }); }
+  }
+  else if(a === 'wake'){ const id = addEvent({type: 'wake', start: Date.now()}); render(); toast('Réveil enregistré', () => delEvent(id)); }
+  else if(a === 'diaper'){ const id = addEvent({type: 'diaper', start: Date.now(), kind: el.dataset.kind}); render(); toast(diaperLabel(el.dataset.kind) + ' enregistré', () => delEvent(id)); }
+  else if(a === 'bottle') openEditor(null, {type: 'bottle'});
+  else if(a === 'add') openEditor(null, {type: el.dataset.type, day: el.dataset.day ? +el.dataset.day : null});
+  else if(a === 'edit') openEditor(el.dataset.id);
+  else if(a === 'prevday'){ const d = new Date(viewDay); d.setDate(d.getDate() - 1); viewDay = d.getTime(); render(); }
+  else if(a === 'nextday'){ const d = new Date(viewDay); d.setDate(d.getDate() + 1); viewDay = Math.min(d.getTime(), startOfDay(Date.now())); render(); }
+  else if(a === 'exportjson') download('dodo-sauvegarde-' + new Date().toISOString().slice(0,10) + '.json', 'application/json', JSON.stringify({child: S.child, events: S.events}, null, 1));
+  else if(a === 'exportcsv') exportCSV();
+  else if(a === 'synccreate') createFamily();
+  else if(a === 'syncjoin') joinFamily($('#j_code') ? $('#j_code').value : '');
+  else if(a === 'syncleave') leaveFamily();
+  else if(a === 'synccopy'){ navigator.clipboard.writeText(S.sync.fid).then(() => toast('Code copié'), () => prompt('Copie ce code :', S.sync.fid)); }
+  else if(a === 'syncshare'){ navigator.share({text: 'Code Dodo : ' + S.sync.fid}).catch(() => {}); }
+  else if(a === 'importjson') $('#importfile').click();
+  else if(a === 'wipe'){ if(S.sync){ toast("Quitte d'abord le foyer pour tout effacer"); return; } if(confirm('Effacer TOUTES les données ? Pense à exporter avant.') && confirm('Vraiment tout effacer ?')){ S = {child: {name: '', birth: ''}, events: []}; save(); render(); } }
+}
+
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]');
+  if(el){ ev.preventDefault(); act(el); }
+});
+document.addEventListener('input', ev => {
+  if(ev.target.id === 's_name'){ S.child.name = ev.target.value; save(); syncProfile(); }
+  if(ev.target.id === 's_birth'){ S.child.birth = ev.target.value; save(); syncProfile(); }
+});
+document.addEventListener('change', ev => {
+  if(ev.target.id === 'importfile' && ev.target.files[0]){
+    const r = new FileReader();
+    r.onload = () => {
+      try{
+        const j = JSON.parse(r.result);
+        if(!j || !Array.isArray(j.events)) throw new Error('format');
+        if(S.sync){
+          const valid = j.events.filter(e => e && typeof e.id === 'string' && fromDoc(e.id, e));
+          if(confirm('Ajouter ' + valid.length + ' évènements au foyer synchronisé ?')){
+            S.sync.dirty = S.sync.dirty || {};
+            valid.forEach(e => {
+              const i = S.events.findIndex(x => x.id === e.id);
+              if(i >= 0) S.events[i] = e; else S.events.push(e);
+              S.sync.dirty[e.id] = {op: 'put', v: Date.now() + Math.random()};
+            });
+            save(); flushAll(); render(); toast('Sauvegarde importée');
+          }
+        } else if(confirm('Remplacer les données actuelles par la sauvegarde (' + j.events.length + ' évènements) ?')){
+          S = {child: j.child || {name: '', birth: ''}, events: j.events}; save(); render(); toast('Sauvegarde importée');
+        }
+      }catch(e){ toast('Fichier invalide'); }
+    };
+    r.readAsText(ev.target.files[0]); ev.target.value = '';
+  }
+});
+
+// Rafraîchit les compteurs de l'accueil
+setInterval(() => { if(tab === 'home' && !document.querySelector('.overlay')) render(); }, 30000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden && !document.querySelector('.overlay') && tab !== 'set') render(); });
+
+render();
+if(!S.child.birth && S.events.length === 0 && !S.sync){ tab = 'set'; render(); toast('Commence par renseigner la date de naissance'); }
+if(S.sync && syncAvailable()) startSync(S.sync.fid);
+
+// Mode hors ligne / installation (uniquement quand la page est servie en http ou https)
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service worker non enregistré', e));
+}
+</script>
+</body>
+</html>
