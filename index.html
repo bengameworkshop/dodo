@@ -13,17 +13,23 @@
 <title>Doudodo - sommeil de bébé</title>
 <style>
 :root{
+  --bg:#120a29; --card:#1d1340; --raised:#2a1c59; --text:#f5f0ff; --muted:#b5a9da; --line:#34266c;
+  --accent:#b89cff; --on-accent:#1b0f3d; --accent-soft:#2f2066; --glow:rgba(150,110,255,.35);
+  --sleep:#cdb8ff; --night:#6c48de; --meal:#ff7fbf; --pee:#5cc9f0; --poop:#cf9c78; --wake:#dd8bff; --med:#4fd6a4; --temp:#ff7f8f; --note:#a3aed6;
+  --late:#ff7f9b; color-scheme:dark;
+}
+:root[data-theme="light"]{
   --bg:#f6f2ff; --card:#ffffff; --raised:#efe8ff; --text:#1f1440; --muted:#62577f; --line:#e6defa;
   --accent:#6a3be0; --on-accent:#ffffff; --accent-soft:#ece4ff; --glow:rgba(106,59,224,.28);
   --sleep:#7450e8; --night:#43239f; --meal:#d6408c; --pee:#1293c4; --poop:#8f5f3e; --wake:#b54fdc; --med:#16946a; --temp:#de4458; --note:#64719a;
-  --late:#d23a5c;
+  --late:#d23a5c; color-scheme:light;
 }
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#120a29; --card:#1d1340; --raised:#2a1c59; --text:#f5f0ff; --muted:#b5a9da; --line:#34266c;
-    --accent:#b89cff; --on-accent:#1b0f3d; --accent-soft:#2f2066; --glow:rgba(150,110,255,.35);
-    --sleep:#a58bff; --night:#7a5be6; --meal:#ff7fbf; --pee:#5cc9f0; --poop:#cf9c78; --wake:#dd8bff; --med:#4fd6a4; --temp:#ff7f8f; --note:#a3aed6;
-    --late:#ff7f9b;
+@media (prefers-color-scheme:light){
+  :root[data-theme="auto"]{
+  --bg:#f6f2ff; --card:#ffffff; --raised:#efe8ff; --text:#1f1440; --muted:#62577f; --line:#e6defa;
+  --accent:#6a3be0; --on-accent:#ffffff; --accent-soft:#ece4ff; --glow:rgba(106,59,224,.28);
+  --sleep:#7450e8; --night:#43239f; --meal:#d6408c; --pee:#1293c4; --poop:#8f5f3e; --wake:#b54fdc; --med:#16946a; --temp:#de4458; --note:#64719a;
+  --late:#d23a5c; color-scheme:light;
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -97,7 +103,7 @@ h2{font-size:18px;margin:26px 0 6px;font-weight:800}
 .ic{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--c,var(--accent));background:color-mix(in srgb,var(--c,var(--accent)) 16%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
 .ic svg{width:22px;height:22px;fill:currentColor;fill-opacity:.2;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .ic.two{display:flex;justify-content:center;gap:0}.ic.two svg{width:17px;height:17px;margin:0 -1px}
-.ic.sleep{--c:var(--sleep)}.ic.night{--c:var(--night)}.ic.meal{--c:var(--meal)}.ic.pee{--c:var(--pee)}.ic.poop{--c:var(--poop)}.ic.wake{--c:var(--wake)}.ic.med{--c:var(--med)}.ic.temp{--c:var(--temp)}.ic.note{--c:var(--note)}
+.ic.sleep{--c:var(--sleep)}.ic.night{--c:var(--night)}.ic.meal{--c:var(--meal)}.ic.pee{--c:var(--pee)}.ic.poop{--c:var(--poop)}.ic.wake{--c:var(--wake)}.ic.med{--c:var(--med)}.ic.temp{--c:var(--temp)}.ic.note{--c:var(--note)}.ic.growth{--c:var(--accent)}
 
 /* Frise 0 h - 24 h */
 .tl{position:relative;margin-top:4px}
@@ -148,9 +154,9 @@ h2{font-size:18px;margin:26px 0 6px;font-weight:800}
 .btn.small{padding:12px;font-size:16px;margin-top:8px}
 
 nav{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:5}
-nav button{flex:1;max-width:140px;padding:9px 0 8px;font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button{flex:1;max-width:140px;padding:9px 0 8px;font-size:12px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
 nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-nav button span{padding:3px 16px;border-radius:99px;display:grid}
+nav button span{padding:3px 14px;border-radius:99px;display:grid}
 nav button.on{color:var(--accent);font-weight:800}
 nav button.on span{background:var(--accent-soft);box-shadow:0 0 14px var(--glow)}
 
@@ -188,7 +194,85 @@ textarea{min-height:90px;resize:vertical}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom));background:#2a1766;color:#fff;padding:13px 16px;border-radius:16px;z-index:30;display:flex;gap:14px;align-items:center;font-size:15px;font-weight:600;box-shadow:0 10px 30px -6px rgba(60,20,150,.7);max-width:92vw;border:1px solid rgba(255,255,255,.16)}
 .toast button{color:#d9c8ff;font-weight:800}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:16px;letter-spacing:.03em;word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Horloge de la journée */
+.clock{max-width:300px;margin:0 auto}
+.clock svg{display:block;width:100%;height:auto;overflow:visible}
+.ctrack{fill:none;stroke:var(--raised);stroke-width:26}
+.cnap,.cngt,.cpred{fill:none;stroke-width:26}
+.cnap{stroke:var(--sleep)}
+.cngt{stroke:var(--night)}
+.cpred{stroke:var(--sleep);stroke-opacity:.45;stroke-dasharray:3 3}
+.live{animation:breathe 2.6s ease-in-out infinite;filter:drop-shadow(0 0 7px var(--sleep))}
+@keyframes breathe{50%{stroke-opacity:.5}}
+.ctick{stroke:var(--muted);stroke-width:1.5;opacity:.45;stroke-linecap:round}
+.ctick.major{stroke-width:2.5;opacity:.8}
+.clab{fill:var(--muted);font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.cnow{stroke:var(--late);stroke-width:3;stroke-linecap:round;filter:drop-shadow(0 0 4px var(--late))}
+.cbig{fill:var(--text);font-size:30px;font-weight:800;text-anchor:middle;font-variant-numeric:tabular-nums}
+.csmall{fill:var(--muted);font-size:13px;text-anchor:middle}
+.legend i.dash{background:repeating-linear-gradient(90deg,var(--sleep) 0 3px,transparent 3px 6px);border:none;opacity:.7}
+.more.left{text-align:left;padding:2px 0 4px;width:auto}
+
+/* Sommeil en cours : « z » qui s'envolent, lune qui respire */
+.sky .zzz{position:absolute;right:34px;top:16px;width:40px;height:80px;z-index:2;pointer-events:none}
+.zzz span{position:absolute;right:0;bottom:0;opacity:0;color:#fff;font-weight:800;font-size:18px;text-shadow:0 0 12px rgba(255,255,255,.8);animation:zfloat 3.9s ease-out infinite}
+.zzz span:nth-child(2){animation-delay:1.3s;font-size:23px}
+.zzz span:nth-child(3){animation-delay:2.6s;font-size:28px}
+@keyframes zfloat{0%{transform:translate(0,0) rotate(-8deg);opacity:0}20%{opacity:.95}100%{transform:translate(-30px,-58px) rotate(6deg);opacity:0}}
+.sky.asleep::before{animation:moonglow 4.5s ease-in-out infinite}
+@keyframes moonglow{50%{opacity:.8;box-shadow:0 0 80px 34px rgba(255,255,255,.38)}}
+.sky.asleep .path .me{animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(255,255,255,.12),0 0 26px 12px rgba(255,255,255,.75)}}
+.toast .tx-extra{color:#fff;background:rgba(255,255,255,.16);padding:6px 10px;border-radius:10px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.zzz span{opacity:.6}}
+
+/* Diagnostic de synchro */
+.diag{margin:12px 0 8px;border-top:1px solid var(--line)}
+.diag div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.diag span{color:var(--muted)}
+.diag b{text-align:right}
+
+/* Croissance */
+.gcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:14px}
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 28px -22px var(--glow)}
+.gcard span{color:var(--muted);font-size:14px;font-weight:700}
+.gcard b{display:block;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;margin:2px 0}
+.gcard small{display:block;color:var(--muted);font-size:13px}
+.gcard small.tr{color:var(--text);font-weight:600;margin-top:2px}
+.lchart{display:block;width:100%;height:auto;overflow:visible}
+.lchart .gl{stroke:var(--line);stroke-width:1}
+.lchart .gy{fill:var(--muted);font-size:11px;text-anchor:end;dominant-baseline:central}
+.lchart .gx{fill:var(--muted);font-size:11px}
+.lchart .lv{fill:var(--text);font-size:13px;font-weight:800;text-anchor:end}
+
+/* Mode nuit doux : très sombre, peu lumineux, sans halo */
+:root.soft{
+  --bg:#06040d; --card:#0d0919; --raised:#161029; --text:#a898c9; --muted:#6c6188; --line:#1b1433;
+  --accent:#8b77c4; --on-accent:#0b0716; --accent-soft:#191230; --glow:transparent;
+  --sleep:#7c6bb8; --night:#4a3a8c; --meal:#a0577f; --pee:#3f7f99; --poop:#7d6250; --wake:#8a5fa0; --med:#3e8a6c; --temp:#a3515e; --note:#5e6684;
+  --late:#a35068; color-scheme:dark;
+}
+:root.soft .sky{background:linear-gradient(160deg,#17102f,#0c0819);color:#b6a7dd;box-shadow:none}
+:root.soft .sky::before{opacity:.1;box-shadow:none}
+:root.soft .sky::after{opacity:.3}
+:root.soft .sky .lead,:root.soft .sky .why,:root.soft .ends{color:#7f74a3}
+:root.soft .sky .time{text-shadow:none}
+:root.soft .state{background:rgba(255,255,255,.06);color:#b6a7dd;border-color:rgba(255,255,255,.08)}
+:root.soft .state.now{background:#2c2154;color:#d5c8f7;box-shadow:none}
+:root.soft .state.late{background:#3a1726;color:#d79aab}
+:root.soft .cta{background:#211839;color:#c4b4f2;box-shadow:none}
+:root.soft .ghost{color:#9d90c6;border-color:rgba(255,255,255,.1);background:none}
+:root.soft .path .me,:root.soft .path .done{background:#9d90c6;box-shadow:none}
+:root.soft .path .zone{background:rgba(255,255,255,.06);border-color:#6f62a0;box-shadow:none}
+:root.soft .btn{background:var(--accent);box-shadow:none}
+:root.soft .btn.sec{background:var(--accent-soft)}
+:root.soft .top svg{filter:brightness(.55) saturate(.7);box-shadow:none}
+:root.soft .zzz span{text-shadow:none;color:#9d90c6}
+:root.soft .live,:root.soft .cnow{filter:none}
+:root.soft .toast{background:#140e26;color:#c4b4f2;box-shadow:none}
+:root.soft nav{background:#0b0716}
+:root.soft img,:root.soft .ic{filter:saturate(.75)}
 </style>
 </head>
 <body>
@@ -363,12 +447,13 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
+const APP_VERSION = '2026.11.17-3';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
   try{ r = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
   if(!r || !Array.isArray(r.events)) r = {child: {name: '', birth: ''}, events: []};
-  r.settings = Object.assign({notif: false, lead: 15}, r.settings || {});
+  r.settings = Object.assign({notif: false, lead: 15, theme: 'dark', soft: 'auto'}, r.settings || {});
   return r;
 }
 let S = load();
@@ -384,6 +469,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const pad = n => String(n).padStart(2, '0');
 const fmtT = ts => new Date(ts).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
 const fmtD = m => { m = Math.round(m); return m < 60 ? m + ' min' : Math.floor(m/60) + 'h' + pad(m % 60); };
+const fmtNum = (v, d) => String(Math.round(v * 10 ** d) / 10 ** d).replace('.', ',');
 const toInput = ts => { const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const fromInput = s => new Date(s).getTime();
 const dayLabel = ts => {
@@ -422,14 +508,18 @@ const IC = {
   pill: '<g transform="rotate(-45 12 12)"><rect x="3" y="8.500" width="18" height="7" rx="3.500"/><path d="M12 8.500v7"/></g>',
   temp: '<path d="M12 3a2 2 0 0 0-2 2v9.300a4 4 0 1 0 4 0V5a2 2 0 0 0-2-2z"/><path d="M12 9v6"/>',
   note: '<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5M8 9h8M8 13h4"/>',
+  ruler: '<rect x="2.500" y="8" width="19" height="8" rx="1.500"/><path d="M6.500 8v3M10.500 8v4M14.500 8v3M18.500 8v4"/>',
   spark: '<path d="M11 3l1.900 5.600 5.600 1.900-5.600 1.900L11 18l-1.900-5.600-5.600-1.900 5.600-1.900z"/><path d="M19 15v4M17 17h4"/>'
 };
 const icon = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
 const SPAN = {nap: 1, night: 1, nwake: 1};
-const TYPE_LABEL = {nap: 'Sieste', night: 'Nuit', wake: 'Réveil du matin', nwake: 'Réveil nocturne', bottle: 'Repas', diaper: 'Couche', med: 'Médicament', temp: 'Température', note: 'Note'};
-const SHEET_TITLE = {nap: 'Ajouter une sieste', night: 'Ajouter une nuit', wake: 'Ajouter un réveil du matin', nwake: 'Noter un réveil nocturne', bottle: 'Noter un repas', diaper: 'Noter une couche', med: 'Noter un médicament', temp: 'Noter une température', note: 'Écrire une note'};
+const TYPE_LABEL = {nap: 'Sieste', night: 'Nuit', wake: 'Réveil du matin', nwake: 'Réveil nocturne', bottle: 'Repas', diaper: 'Couche', med: 'Médicament', temp: 'Température', note: 'Note', growth: 'Mesure'};
+const SHEET_TITLE = {nap: 'Ajouter une sieste', night: 'Ajouter une nuit', wake: 'Ajouter un réveil du matin', nwake: 'Noter un réveil nocturne', bottle: 'Noter un repas', diaper: 'Noter une couche', med: 'Noter un médicament', temp: 'Noter une température', note: 'Écrire une note', growth: 'Ajouter une mesure'};
 const SIDE = {left: 'sein gauche', right: 'sein droit', both: 'les deux seins'};
 
+function growthText(e){
+  return [e.w != null ? fmtNum(e.w, 2) + ' kg' : '', e.h != null ? fmtNum(e.h, 1) + ' cm' : '', e.hc != null ? 'crâne ' + fmtNum(e.hc, 1) + ' cm' : ''].filter(Boolean).join(', ');
+}
 function eventInfo(e){
   let r;
   if(e.type === 'nap') r = e.end ? {ic: 'moon', cls: 'sleep', main: 'Sieste de ' + fmtD((e.end - e.start) / MIN), sub: 'de ' + fmtT(e.start) + ' à ' + fmtT(e.end)}
@@ -442,11 +532,12 @@ function eventInfo(e){
     const k = e.kind || 'bottle';
     if(k === 'breast') r = {ic: 'heart', cls: 'meal', main: 'Tétée' + (e.val ? ' de ' + e.val + ' min' : ''), sub: SIDE[e.side] || ''};
     else if(k === 'solid') r = {ic: 'bowl', cls: 'meal', main: 'Repas solide', sub: ''};
-    else r = {ic: 'bottle', cls: 'meal', main: 'Biberon de ' + (e.ml || 0) + ' ml', sub: ''};
+    else r = {ic: 'bottle', cls: 'meal', main: e.ml ? 'Biberon de ' + e.ml + ' ml' : 'Biberon', sub: e.ml ? '' : 'Quantité non précisée'};
   }
   else if(e.type === 'diaper') r = {ic: e.kind === 'pee' ? 'drop' : 'poop', cls: e.kind === 'pee' ? 'pee' : 'poop', main: 'Couche : ' + diaperLabel(e.kind).toLowerCase(), sub: ''};
   else if(e.type === 'med') r = {ic: 'pill', cls: 'med', main: 'Médicament', sub: ''};
   else if(e.type === 'temp') r = {ic: 'temp', cls: 'temp', main: 'Température : ' + String(e.val).replace('.', ',') + ' °C', sub: e.val >= 38 ? 'Fièvre (38 °C ou plus)' : ''};
+  else if(e.type === 'growth') r = {ic: 'ruler', cls: 'growth', main: 'Mesure : ' + growthText(e), sub: ''};
   else if(e.type === 'note') r = {ic: 'note', cls: 'note', main: 'Note', sub: ''};
   else r = {ic: 'note', cls: 'note', main: e.type, sub: ''};
   if(e.note) r.sub = r.sub ? r.sub + '. ' + e.note : e.note;
@@ -464,7 +555,7 @@ function rowsHTML(list, emptyText){
     return `<button class="row" data-act="edit" data-id="${e.id}" aria-label="Modifier : ${esc(i.main)} à ${fmtT(e.start)}">
       <span class="ic ${i.cls}">${icon(i.ic)}</span>
       <span class="d">${esc(i.main)}${i.sub ? `<small>${esc(i.sub)}</small>` : ''}${stale ? '<small class="bad">Heure de fin manquante, à corriger</small>' : ''}</span>
-      <span class="t">${fmtT(e.start)}</span><span class="edit">Modifier</span></button>`;
+      <span class="t">${e.type === 'growth' ? new Date(e.start).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}) : fmtT(e.start)}</span><span class="edit">Modifier</span></button>`;
   }).join('');
 }
 
@@ -474,14 +565,19 @@ const NAV = [
   ['home', 'Accueil', '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
   ['log', 'Journal', '<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>'],
   ['stats', 'Stats', '<path d="M5 20V11M12 20V4M19 20v-6"/>'],
+  ['grow', 'Croissance', '<path d="M4 20h16"/><path d="M5 16l4.500-4.500 3 3L20 7"/><path d="M15 7h5v5"/>'],
   ['set', 'Réglages', '<path d="M4 7h8m5 0h3M4 17h3m5 0h8"/><circle cx="14.5" cy="7" r="2.5"/><circle cx="9.5" cy="17" r="2.5"/>']
 ];
 function render(){
+  applyTheme();
   const app = $('#app');
   if(tab === 'home') app.innerHTML = homeHTML();
   else if(tab === 'log') app.innerHTML = logHTML();
   else if(tab === 'stats') app.innerHTML = statsHTML();
+  else if(tab === 'grow') app.innerHTML = growthHTML();
   else app.innerHTML = settingsHTML();
+  const upd = updateHTML();
+  if(upd) app.insertAdjacentHTML('afterbegin', upd);
   $('#nav').innerHTML = NAV.map(([k, l, p]) =>
     `<button class="${tab === k ? 'on' : ''}" data-act="tab" data-tab="${k}"${tab === k ? ' aria-current="page"' : ''}><span><svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg></span>${l}</button>`).join('');
 }
@@ -515,7 +611,7 @@ function skyHTML(p, now){
   if(p.state === 'night'){
     const wakes = S.events.filter(e => e.type === 'nwake' && e.start >= p.since).length;
     const pos = p.wakeAt ? Math.min(100, Math.max(0, 100 * (now - p.since) / Math.max(p.wakeAt - p.since, MIN))) : null;
-    return `<section class="sky">
+    return `<section class="sky asleep"><div class="zzz" aria-hidden="true"><span>z</span><span>z</span><span>z</span></div>
       <p class="lead">Nuit en cours</p>
       <div class="time">${fmtD((now - p.since) / MIN)}</div>
       <span class="state">${p.wakeAt ? 'Réveil habituel vers ' + fmtT(p.wakeAt) : 'Bonne nuit'}</span>
@@ -526,7 +622,7 @@ function skyHTML(p, now){
   }
   if(p.state === 'sleeping'){
     const pos = Math.min(100, Math.max(0, 100 * (now - p.since) / Math.max(p.wakeAt - p.since, MIN)));
-    return `<section class="sky">
+    return `<section class="sky asleep"><div class="zzz" aria-hidden="true"><span>z</span><span>z</span><span>z</span></div>
       <p class="lead">Sieste n°${p.rank} en cours</p>
       <div class="time">${fmtD((now - p.since) / MIN)}</div>
       <span class="state">${now < p.wakeAt ? 'Réveil habituel vers ' + fmtT(p.wakeAt) : 'Dort plus longtemps que d\'habitude'}</span>
@@ -587,12 +683,48 @@ function trackParts(ds, p){
   return {top, mid, bot, ticks, nowX: isToday ? x(now).toFixed(2) : null};
 }
 const AXIS = '<div class="axis">' + [0,4,8,12,16,20,24].map(h => `<span style="left:${(100 * h / 24).toFixed(2)}%">${h}h</span>`).join('') + '</div>';
-function timelineHTML(ds, p){
-  const t = trackParts(ds, p);
-  return `<div class="tl" role="img" aria-label="Frise de la journée">
-      <div class="trk">${t.top}</div><div class="trk mid">${t.mid}</div><div class="trk">${t.bot}</div>
-      ${t.nowX != null ? `<i class="nowline" style="left:${t.nowX}%"></i>` : ''}${AXIS}</div>
-    <div class="legend"><span><i class="blk" style="background:var(--night)"></i>Nuit</span><span><i class="blk" style="background:var(--sleep)"></i>Sieste</span>${t.nowX != null ? '<span><i class="dash"></i>Prévu</span>' : ''}<span><i style="background:var(--meal)"></i>Repas</span><span><i style="background:var(--pee)"></i>Pipi</span><span><i style="background:var(--poop)"></i>Caca</span></div>`;
+// Journée en cercle, comme une horloge de 24 h : minuit en haut, midi en bas.
+const CX = 150;
+const polar = (r, a) => { const t = (a - 90) * Math.PI / 180; return [CX + r * Math.cos(t), CX + r * Math.sin(t)]; };
+function arcPath(r, a0, a1){
+  a1 = Math.min(a1, a0 + 359.9);
+  const [x0, y0] = polar(r, a0), [x1, y1] = polar(r, a1);
+  return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+}
+function clockHTML(ds, p){
+  const now = Date.now(), isToday = ds === startOfDay(now);
+  const ang = t => 360 * (Math.min(ds + DAY, Math.max(ds, t)) - ds) / DAY;
+  let arcs = '', dots = '', meals = 0, diapers = 0;
+  for(const e of S.events){
+    if(e.type === 'nap' || e.type === 'night'){
+      const open = !e.end && now - e.start < (e.type === 'nap' ? 12 : 18) * H;
+      const end = e.end || (open ? now : e.start + 30 * MIN);
+      if(e.start >= ds + DAY || end <= ds) continue;
+      const a0 = ang(e.start), a1 = Math.max(ang(end), a0 + 1.5);
+      arcs += `<path d="${arcPath(112, a0, a1)}" class="${e.type === 'nap' ? 'cnap' : 'cngt'}${open ? ' live' : ''}"/>`;
+    } else if(e.start >= ds && e.start < ds + DAY){
+      if(e.type === 'bottle'){ const [x, y] = polar(139, ang(e.start)); dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.5" fill="var(--meal)"/>`; meals++; }
+      else if(e.type === 'diaper'){ const [x, y] = polar(86, ang(e.start)); dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="var(--${e.kind === 'pee' ? 'pee' : 'poop'})"/>`; diapers++; }
+    }
+  }
+  if(isToday && p && p.state === 'awake') arcs += `<path d="${arcPath(112, ang(p.from), ang(p.to))}" class="cpred"/>`;
+  let marks = '';
+  for(let h = 0; h < 24; h++){
+    const [x0, y0] = polar(h % 6 ? 126 : 125, h * 15), [x1, y1] = polar(h % 6 ? 129 : 131, h * 15);
+    marks += `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" class="ctick${h % 6 ? '' : ' major'}"/>`;
+  }
+  for(let h = 0; h < 24; h += 3){ const [x, y] = polar(70, h * 15); marks += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="clab">${h}h</text>`; }
+  let hand = '';
+  if(isToday){
+    const a = ang(now), [x0, y0] = polar(97, a), [x1, y1] = polar(131, a);
+    hand = `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" class="cnow"/><circle cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="4" fill="var(--late)"/>`;
+  }
+  const sl = sleepInDay(ds, now), tot = sl.nap + sl.night;
+  const label = `Journée de 0 h à 24 h : ${tot ? fmtD(tot) : 'pas encore'} de sommeil, ${meals} repas, ${diapers} couche${diapers > 1 ? 's' : ''}`;
+  return `<div class="clock"><svg viewBox="0 0 300 300" role="img" aria-label="${esc(label)}">
+      <circle cx="150" cy="150" r="112" class="ctrack"/>${arcs}${marks}${dots}${hand}
+      <text x="150" y="146" class="cbig">${tot ? fmtD(tot) : '0 min'}</text><text x="150" y="170" class="csmall">de sommeil</text></svg></div>
+    <div class="legend"><span><i class="blk" style="background:var(--night)"></i>Nuit</span><span><i class="blk" style="background:var(--sleep)"></i>Sieste</span>${isToday ? '<span><i class="dash"></i>Sieste prévue</span>' : ''}<span><i style="background:var(--meal)"></i>Repas (bord)</span><span><i style="background:var(--pee)"></i>Pipi</span><span><i style="background:var(--poop)"></i>Caca (centre)</span></div>`;
 }
 // Sommeil compris dans la journée (les nuits sont découpées à minuit).
 function sleepInDay(ds, now){
@@ -607,9 +739,9 @@ function sleepInDay(ds, now){
 }
 function totalsHTML(ds){
   const ev = eventsOfDay(ds), sl = sleepInDay(ds, Date.now());
-  const meals = ev.filter(e => e.type === 'bottle'), ml = meals.reduce((s,e) => s + (e.ml || 0), 0), dp = ev.filter(e => e.type === 'diaper');
+  const naps = ev.filter(e => e.type === 'nap').length, meals = ev.filter(e => e.type === 'bottle'), ml = meals.reduce((s,e) => s + (e.ml || 0), 0), dp = ev.filter(e => e.type === 'diaper');
   return `<div class="totals">
-    <div><b>${sl.nap + sl.night ? fmtD(sl.nap + sl.night) : '0'}</b><span>de sommeil</span></div>
+    <div><b>${sl.nap ? fmtD(sl.nap) : '0'}</b><span>${naps} sieste${naps > 1 ? 's' : ''}</span></div>
     <div><b>${meals.length}</b><span>repas${ml ? ', ' + ml + ' ml' : ''}</span></div>
     <div><b>${dp.length}</b><span>couche${dp.length > 1 ? 's' : ''}</span></div></div>`;
 }
@@ -620,19 +752,19 @@ function homeHTML(){
   const age = ageText(S.child.birth);
   const lm = lastOf(e => e.type === 'bottle'), ld = lastOf(e => e.type === 'diaper'), lmed = lastOf(e => e.type === 'med' && now - e.start < DAY);
   const todayEv = eventsOfDay(today);
+  const quick = (act, kind, cls, ic, label) => `<button class="tile" data-act="${act}" data-kind="${kind}"><span class="ic ${cls}">${ic}</span><b>${label}</b></button>`;
+  const last = [lm ? 'dernier repas ' + agoText(lm.start) + ' (' + esc(mealText(lm)) + ')' : '', ld ? 'dernière couche ' + agoText(ld.start) + ' (' + diaperLabel(ld.kind).toLowerCase() + ')' : ''].filter(Boolean).join(', ');
   return `<header class="top">${LOGO_SVG}<div><div class="brand">${esc(S.child.name || 'Doudodo')}</div>
       <div class="who">${age ? esc(age) : '<a href="#" data-act="tab" data-tab="set">Indique sa date de naissance</a>'}${syncBadge()}</div></div></header>
     ${installHTML()}${warnHTML(now)}
     ${skyHTML(p, now)}
     ${learnHTML(now)}
     <h2>Noter un repas ou une couche</h2>
-    <button class="tile" data-act="bottle"><span class="ic meal">${icon('bottle')}</span><span class="tx"><b>Repas</b><small>${lm ? 'Dernier ' + agoText(lm.start) + ' : ' + esc(mealText(lm)) : 'Biberon, tétée ou repas solide'}</small></span><span class="plus" aria-hidden="true">+</span></button>
-    <div class="tiles3">
-      <button class="tile" data-act="diaper" data-kind="pee"><span class="ic pee">${icon('drop')}</span><b>Pipi</b></button>
-      <button class="tile" data-act="diaper" data-kind="poop"><span class="ic poop">${icon('poop')}</span><b>Caca</b></button>
-      <button class="tile" data-act="diaper" data-kind="both"><span class="ic poop two">${icon('drop')}${icon('poop')}</span><b>Les deux</b></button>
-    </div>
-    <p class="hint">Une couche s'enregistre en un appui, à l'heure actuelle. ${ld ? 'Dernière ' + agoText(ld.start) + ' (' + diaperLabel(ld.kind).toLowerCase() + ').' : ''}</p>
+    <p class="hint">Un appui enregistre à l'heure actuelle. La quantité, le côté ou une note s'ajoutent ensuite si tu veux, en touchant la ligne.</p>
+    <div class="tiles3">${quick('meal', 'bottle', 'meal', icon('bottle'), 'Biberon')}${quick('meal', 'breast', 'meal', icon('heart'), 'Tétée')}${quick('meal', 'solid', 'meal', icon('bowl'), 'Solide')}</div>
+    <div class="tiles3">${quick('diaper', 'pee', 'pee', icon('drop'), 'Pipi')}${quick('diaper', 'poop', 'poop', icon('poop'), 'Caca')}${quick('diaper', 'both', 'poop two', icon('drop') + icon('poop'), 'Les deux')}</div>
+    ${last ? `<p class="hint">${last.charAt(0).toUpperCase() + last.slice(1)}.</p>` : ''}
+    <button class="more left" data-act="bottle">Noter un repas à une autre heure</button>
     <h2>Santé et notes</h2>
     <div class="tiles3">
       <button class="tile" data-act="add" data-type="med" data-lock="1"><span class="ic med">${icon('pill')}</span><b>Médicament</b></button>
@@ -641,17 +773,17 @@ function homeHTML(){
     </div>
     ${lmed ? `<p class="hint">Dernier médicament ${agoText(lmed.start)} : ${esc(lmed.note || '')}.</p>` : ''}
     <h2>Aujourd'hui</h2>
-    <div class="card">${timelineHTML(today, p)}${totalsHTML(today)}</div>
+    <div class="card">${clockHTML(today, p)}${totalsHTML(today)}</div>
     <div class="card rows">${rowsHTML(todayEv.slice(-4).reverse(), "Rien d'enregistré aujourd'hui. Commence par le réveil du matin.")}
       ${todayEv.length ? '<button class="more" data-act="tab" data-tab="log">Voir toute la journée dans le journal</button>' : ''}</div>`;
 }
 
 function logHTML(){
   const list = eventsOfDay(viewDay), isToday = viewDay === startOfDay(Date.now());
-  return `<h1>Journal</h1><p class="sub">Tout ce qui a été noté, jour par jour. Touche une ligne pour la corriger ou la supprimer.</p>
+  return `<h1>Journal</h1><p class="sub">Du plus récent au plus ancien. Touche une ligne pour la corriger ou la supprimer.</p>
     <div class="datenav"><button data-act="prevday">Jour précédent</button><div class="lbl">${esc(dayLabel(viewDay))}</div><button data-act="nextday"${isToday ? ' disabled' : ''}>Jour suivant</button></div>
-    <div class="card">${timelineHTML(viewDay, isToday ? predict(S.events, Date.now(), S.child.birth) : null)}${totalsHTML(viewDay)}</div>
-    <div class="card rows">${rowsHTML(list, "Rien d'enregistré ce jour-là.")}</div>
+    <div class="card">${clockHTML(viewDay, isToday ? predict(S.events, Date.now(), S.child.birth) : null)}${totalsHTML(viewDay)}</div>
+    <div class="card rows">${rowsHTML(list.slice().reverse(), "Rien d'enregistré ce jour-là.")}</div>
     <button class="btn" data-act="add" data-type="nap" data-day="${viewDay}">Ajouter un évènement oublié</button>`;
 }
 
@@ -690,7 +822,7 @@ function statsHTML(){
       <div class="legend"><span><i class="blk" style="background:var(--night)"></i>Nuit</span><span><i class="blk" style="background:var(--sleep)"></i>Siestes</span></div>
       <p class="note" style="margin:8px 0 0">Heures de sommeil entre 0 h et 24 h. La nuit ne compte que si le coucher et le réveil sont enregistrés.</p></div>
     <h2>Lait bu par jour</h2>
-    <div class="card">${barsHTML(milk)}<p class="note" style="margin:8px 0 0">En ml, d'après les biberons. Les tétées et repas solides ne sont pas comptés ici. Repas par jour : ${milk.map(m => m.n).join(', ')}.</p></div>
+    <div class="card">${barsHTML(milk)}<p class="note" style="margin:8px 0 0">En ml, d'après les biberons dont la quantité est notée. Les tétées et repas solides ne sont pas comptés ici. Repas par jour : ${milk.map(m => m.n).join(', ')}.</p></div>
     <h2>Fiabilité des prédictions</h2>
     <div class="card">${acc.n >= 5 ? `<div class="big">${Math.round(acc.mae)} min d'écart</div>
       <p class="note" style="margin:6px 0 0">Écart moyen entre l'heure conseillée et le début réel, sur les ${acc.n} dernières siestes. ${acc.hit} % ont commencé dans le créneau conseillé. Ce chiffre est flatteur si tu suis les conseils de l'appli.</p>`
@@ -709,6 +841,14 @@ function settingsHTML(){
       <label style="margin-top:0">Prénom</label><input type="text" id="s_name" value="${esc(S.child.name)}" placeholder="Prénom de l'enfant">
       <label>Date de naissance</label><input type="date" id="s_birth" value="${esc(S.child.birth)}">
       <div class="note" style="margin-top:8px">Sert à choisir les repères de sommeil de départ. ${esc(ageText(S.child.birth))}</div>
+    </div>
+    <h2>Apparence</h2>
+    <div class="card">
+      <label style="margin-top:0">Thème</label>
+      <div class="seg">${[['dark', 'Sombre'], ['light', 'Clair'], ['auto', 'Comme le téléphone']].map(([k, l]) => `<button data-act="theme" data-v="${k}" class="${S.settings.theme === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <label>Mode nuit doux</label>
+      <div class="seg">${[['auto', 'Automatique'], ['on', 'Toujours'], ['off', 'Jamais']].map(([k, l]) => `<button data-act="soft" data-v="${k}" class="${S.settings.soft === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="note" style="margin-top:8px">Écran très sombre et moins lumineux, pour noter un biberon la nuit sans s'éblouir ni réveiller bébé. En automatique : de 21 h à 7 h, et pendant une nuit en cours.${isSoft() ? ' Actif en ce moment.' : ''}</div>
     </div>
     <h2>Rappels</h2>
     <div class="card">
@@ -734,24 +874,26 @@ function settingsHTML(){
     <div class="card">
       <div class="note">Efface le profil et les ${S.events.length} évènement${S.events.length > 1 ? 's' : ''} de ce téléphone. Impossible à annuler.</div>
       <button class="btn danger small" data-act="wipe">Tout effacer sur ce téléphone</button>
-    </div>`;
+    </div>
+    <p class="note" style="text-align:center;margin-top:18px">Doudodo, version ${APP_VERSION}</p>`;
 }
 
 // ---------- Toast ----------
 let toastTimer;
-function toast(msg, undo){
+function toast(msg, undo, extra){
   document.querySelectorAll('.toast').forEach(t => t.remove());
   const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
-  t.innerHTML = `<span>${esc(msg)}</span>${undo ? '<button>Annuler</button>' : ''}`;
-  if(undo) t.querySelector('button').onclick = () => { undo(); t.remove(); render(); };
+  t.innerHTML = `<span>${esc(msg)}</span>${extra ? `<button class="tx-extra">${esc(extra.label)}</button>` : ''}${undo ? '<button class="tx-undo">Annuler</button>' : ''}`;
+  if(extra) t.querySelector('.tx-extra').onclick = () => { t.remove(); extra.fn(); };
+  if(undo) t.querySelector('.tx-undo').onclick = () => { undo(); t.remove(); render(); };
   document.body.appendChild(t);
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 5000);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), extra ? 7000 : 5000);
 }
 
 // ---------- Fenêtre de saisie (ajout / correction) ----------
 function closeModal(){ document.querySelectorAll('.overlay').forEach(o => o.remove()); render(); }
 function fillDefaults(d){
-  if(d.type === 'bottle'){ if(!['bottle', 'breast', 'solid'].includes(d.kind)) d.kind = 'bottle'; if(d.ml == null) d.ml = lastMl(); }
+  if(d.type === 'bottle'){ if(!['bottle', 'breast', 'solid'].includes(d.kind)) d.kind = 'bottle'; }
   if(d.type === 'diaper' && !['pee', 'poop', 'both'].includes(d.kind)) d.kind = 'pee';
   if(d.type === 'temp' && typeof d.val !== 'number') d.val = 37;
 }
@@ -772,6 +914,8 @@ function openEditor(id, preset){
     if(q('#f_min')) d.val = Math.max(0, parseInt(q('#f_min').value) || 0);
     if(q('#f_val')) d.val = parseFloat(String(q('#f_val').value).replace(',', '.'));
     if(q('#f_note')) d.note = q('#f_note').value.trim();
+    const num = id => { const v = q(id).value.trim().replace(',', '.'); return v === '' ? null : parseFloat(v); };
+    if(q('#f_w')){ d.w = num('#f_w'); d.h = num('#f_h'); d.hc = num('#f_hc'); }
   };
   const seg = (attr, opts, cur) => `<div class="seg">${opts.map(([k, l]) => `<button data-${attr}="${k}" class="${cur === k ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const draw = () => {
@@ -780,17 +924,21 @@ function openEditor(id, preset){
     if(SPAN[t]) f += `<label>Fin (vide si ${t === 'nwake' ? 'inconnue' : 'en cours'})</label><input type="datetime-local" id="f_end" value="${d.end ? toInput(d.end) : ''}">`;
     if(t === 'bottle'){
       f += '<label>Type de repas</label>' + seg('k', [['bottle', 'Biberon'], ['breast', 'Tétée'], ['solid', 'Solide']], d.kind);
-      if(d.kind === 'bottle') f += `<label>Quantité (ml)</label><div class="stepper"><button data-ml="-10" aria-label="Moins 10 ml">−</button><input type="number" id="f_ml" inputmode="numeric" value="${d.ml}"><button data-ml="10" aria-label="Plus 10 ml">+</button></div>
+      if(d.kind === 'bottle') f += `<label>Quantité en ml (facultatif)</label><div class="stepper"><button data-ml="-10" aria-label="Moins 10 ml">−</button><input type="number" id="f_ml" inputmode="numeric" value="${d.ml || ''}" placeholder="non précisée"><button data-ml="10" aria-label="Plus 10 ml">+</button></div>
         <div class="chips">${[60,90,120,150,180,210,240].map(v => `<button class="chip${d.ml === v ? ' on' : ''}" data-q="${v}">${v} ml</button>`).join('')}</div>`;
       if(d.kind === 'breast') f += '<label>Côté</label>' + seg('side', [['left', 'Gauche'], ['right', 'Droit'], ['both', 'Les deux']], d.side)
         + `<label>Durée en minutes (facultatif)</label><input type="number" id="f_min" inputmode="numeric" value="${d.val || ''}" placeholder="par exemple 15">`;
     }
     if(t === 'diaper') f += '<label>Contenu</label>' + seg('k', [['pee', 'Pipi'], ['poop', 'Caca'], ['both', 'Les deux']], d.kind);
     if(t === 'temp') f += `<label>Température (°C)</label><div class="stepper"><button data-tv="-0.1" aria-label="Moins 0,1">−</button><input type="number" id="f_val" inputmode="decimal" step="0.1" value="${d.val}"><button data-tv="0.1" aria-label="Plus 0,1">+</button></div>`;
+    if(t === 'growth') f += `<p class="note" style="margin:12px 0 0">Remplis seulement ce qui a été mesuré.</p>
+      <label>Poids en kg</label><input type="text" id="f_w" inputmode="decimal" value="${d.w != null ? fmtNum(d.w, 3) : ''}" placeholder="par exemple 6,24">
+      <label>Taille en cm</label><input type="text" id="f_h" inputmode="decimal" value="${d.h != null ? fmtNum(d.h, 1) : ''}" placeholder="par exemple 62,5">
+      <label>Périmètre crânien en cm</label><input type="text" id="f_hc" inputmode="decimal" value="${d.hc != null ? fmtNum(d.hc, 1) : ''}" placeholder="par exemple 41">`;
     f += `<label>${noteLabel}</label>` + (t === 'note' ? `<textarea id="f_note" maxlength="500">${esc(d.note || '')}</textarea>` : `<input type="text" id="f_note" maxlength="300" value="${esc(d.note || '')}"${t === 'med' ? ' placeholder="par exemple Doliprane 2,4 %, dose 6 kg"' : ''}>`);
     ov.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><h3>${existing ? 'Corriger : ' + TYPE_LABEL[t].toLowerCase() : SHEET_TITLE[t]}</h3>
       ${existing || preset.lock ? '' : seg('t', Object.entries(TYPE_LABEL), t)}
-      <label>${SPAN[t] ? (t === 'night' ? 'Coucher' : 'Début') : 'Heure'}</label><input type="datetime-local" id="f_start" value="${toInput(d.start)}">
+      <label>${SPAN[t] ? (t === 'night' ? 'Coucher' : 'Début') : t === 'growth' ? 'Date de la mesure' : 'Heure'}</label><input type="datetime-local" id="f_start" value="${toInput(d.start)}">
       ${f}
       <button class="btn" id="f_save">${existing ? 'Enregistrer la correction' : 'Enregistrer'}</button>
       ${existing ? '<button class="btn danger small" id="f_del">Supprimer cet évènement</button>' : ''}
@@ -799,7 +947,7 @@ function openEditor(id, preset){
     ov.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { sync(); d.kind = b.dataset.k; draw(); });
     ov.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { sync(); d.side = b.dataset.side; draw(); });
     ov.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { sync(); d.ml = +b.dataset.q; draw(); });
-    ov.querySelectorAll('[data-ml]').forEach(b => b.onclick = () => { sync(); d.ml = Math.max(0, d.ml + parseInt(b.dataset.ml)); draw(); });
+    ov.querySelectorAll('[data-ml]').forEach(b => b.onclick = () => { sync(); d.ml = d.ml ? Math.max(0, d.ml + parseInt(b.dataset.ml)) : lastMl(); draw(); });
     ov.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { sync(); d.val = Math.round(((d.val || 37) + parseFloat(b.dataset.tv)) * 10) / 10; q('#f_val').value = d.val; });
     q('#f_cancel').onclick = closeModal;
     if(existing) q('#f_del').onclick = () => { if(confirm('Supprimer cet évènement ?')){ delEvent(existing.id); closeModal(); toast('Évènement supprimé'); } };
@@ -825,9 +973,8 @@ function openEditor(id, preset){
       if(t === 'bottle'){
         clean.kind = d.kind;
         if(d.kind === 'bottle'){
-          if(!d.ml){ toast('Indique une quantité'); return; }
           if(d.ml > 400 && !confirm(d.ml + ' ml, est-ce bien exact ?')) return;
-          clean.ml = d.ml;
+          if(d.ml) clean.ml = d.ml;
         }
         if(d.kind === 'breast'){ if(d.side) clean.side = d.side; if(d.val > 0) clean.val = Math.min(d.val, 180); }
       }
@@ -835,6 +982,21 @@ function openEditor(id, preset){
       if(t === 'temp'){
         if(!(d.val >= 34 && d.val <= 43)){ toast('Température entre 34 et 43 °C attendue'); return; }
         clean.val = Math.round(d.val * 10) / 10;
+      }
+      if(t === 'growth'){
+        let {w, h, hc} = d;
+        if([w, h, hc].some(v => v != null && isNaN(v))){ toast('Un des nombres est mal écrit'); return; }
+        if(w != null && w >= 500) w = w / 1000;   // saisi en grammes
+        if(w == null && h == null && hc == null){ toast('Indique au moins une mesure'); return; }
+        if(w != null && !(w >= 1 && w <= 30)){ toast('Poids entre 1 et 30 kg attendu'); return; }
+        if(h != null && !(h >= 30 && h <= 130)){ toast('Taille entre 30 et 130 cm attendue'); return; }
+        if(hc != null && !(hc >= 25 && hc <= 60)){ toast('Périmètre crânien entre 25 et 60 cm attendu'); return; }
+        const prev = S.events.filter(e => e.type === 'growth' && e.w != null && (!existing || e.id !== existing.id) && e.start < d.start).sort((a,b) => b.start - a.start)[0];
+        if(w != null && prev && (w < prev.w * 0.9 || (d.start - prev.start < 30 * DAY && w > prev.w * 1.25))
+          && !confirm('Le poids passe de ' + fmtNum(prev.w, 2) + ' kg à ' + fmtNum(w, 2) + ' kg. Est-ce bien exact ?')) return;
+        if(w != null) clean.w = Math.round(w * 1000) / 1000;
+        if(h != null) clean.h = Math.round(h * 10) / 10;
+        if(hc != null) clean.hc = Math.round(hc * 10) / 10;
       }
       if((t === 'med' || t === 'note') && !d.note){ toast(t === 'med' ? 'Indique le nom du médicament' : 'Écris ta note'); return; }
       if(d.note) clean.note = d.note;
@@ -856,9 +1018,9 @@ function download(name, mime, text){
 function exportCSV(){
   const loc = t => t ? new Date(t - new Date(t).getTimezoneOffset() * MIN).toISOString().slice(0, 19) : '';
   const cell = v => /[;"\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
-  const rows = [['type', 'debut', 'fin', 'duree_min', 'ml', 'detail', 'valeur', 'note']];
+  const rows = [['type', 'debut', 'fin', 'duree_min', 'ml', 'detail', 'valeur', 'poids_kg', 'taille_cm', 'perimetre_cranien_cm', 'note']];
   S.events.slice().sort((a,b) => a.start - b.start).forEach(e => rows.push([
-    e.type, loc(e.start), loc(e.end), e.end ? Math.round((e.end - e.start) / MIN) : '', e.ml ?? '', [e.kind, e.side].filter(Boolean).join(' '), e.val ?? '', e.note ?? '']));
+    e.type, loc(e.start), loc(e.end), e.end ? Math.round((e.end - e.start) / MIN) : '', e.ml ?? '', [e.kind, e.side].filter(Boolean).join(' '), e.val ?? '', e.w ?? '', e.h ?? '', e.hc ?? '', e.note ?? '']));
   download('doudodo.csv', 'text/csv', '﻿' + rows.map(r => r.map(cell).join(';')).join('\n'));
 }
 function importData(j, what){
@@ -924,8 +1086,8 @@ async function toggleNotif(){
 // ---------- Synchro entre téléphones (Firebase Firestore, facultative) ----------
 // <SYNCLOGIC>
 const CODE_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
-const EVENT_TYPES = ['nap', 'night', 'wake', 'nwake', 'bottle', 'diaper', 'med', 'temp', 'note'];
-const EXTRA_FIELDS = ['ml', 'kind', 'side', 'val', 'note'];
+const EVENT_TYPES = ['nap', 'night', 'wake', 'nwake', 'bottle', 'diaper', 'med', 'temp', 'note', 'growth'];
+const EXTRA_FIELDS = ['ml', 'kind', 'side', 'val', 'w', 'h', 'hc', 'note'];
 function newFamilyCode(rand){
   rand = rand || (n => { const a = new Uint32Array(n); crypto.getRandomValues(a); return Array.from(a); });
   let s = '';
@@ -976,7 +1138,7 @@ const FIREBASE_CONFIG = {
   appId: '1:612628829195:web:2a401c80ef9a57604ea30e'
 };
 const FB_VER = '10.14.1', SYNC_DAYS = 30;
-const SY = {state: 'off', msg: '', db: null, m: null, unsubs: []};
+const SY = {state: 'off', msg: '', db: null, m: null, unsubs: [], lastRemote: 0, foreign: false};
 const syncAvailable = () => !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('délai dépassé'), {code: 'timeout'})), ms))]);
 const syncErr = err => err && err.code === 'permission-denied' ? 'accès refusé, les règles Firestore sont à mettre à jour' : (err && err.code) || 'inconnue';
@@ -999,13 +1161,23 @@ function setSync(state, msg){
 }
 function syncCardHTML(){
   if(!syncAvailable()) return '<div class="card"><div class="note">Le partage entre téléphones n\'est pas configuré dans ce fichier.</div></div>';
-  if(S.sync) return `<div class="card">
+  if(S.sync){
+    const pending = Object.keys(S.sync.dirty || {}).length;
+    return `<div class="card">
     <div class="note">Foyer partagé. L'autre personne va dans Réglages, « Rejoindre un foyer », et saisit ce code :</div>
     <div class="mono">${esc(S.sync.fid)}</div>
-    <div class="note" id="syncstatus">${esc(syncStatusText())}</div>
+    <div class="diag">
+      <div><span>État</span><b id="syncstatus">${esc(syncStatusText())}</b></div>
+      <div><span>Dernier échange avec le serveur</span><b>${SY.lastRemote ? fmtT(SY.lastRemote) : 'pas encore'}</b></div>
+      <div><span>Saisies pas encore envoyées</span><b>${pending}</b></div>
+      <div><span>Version de l'appli</span><b>${APP_VERSION}</b></div>
+    </div>
+    <div class="note">Les deux téléphones doivent afficher la même version. Sinon, ferme complètement Doudodo sur l'autre téléphone (depuis la liste des applis ouvertes) et rouvre-la avec du réseau.</div>
+    <button class="btn sec small" data-act="syncnow">Synchroniser maintenant</button>
     <button class="btn sec small" data-act="synccopy">Copier le code</button>
     ${navigator.share ? '<button class="btn sec small" data-act="syncshare">Envoyer le code</button>' : ''}
     <button class="btn danger small" data-act="syncleave">Quitter le foyer</button></div>`;
+  }
   return `<div class="card">
     <div class="note">Pour partager les données avec une autre personne, crée un foyer puis donne-lui le code. Les données sont envoyées chez Google (Firebase) et quiconque a le code peut les lire et les modifier.</div>
     <button class="btn small" data-act="synccreate">Créer un foyer</button>
@@ -1074,11 +1246,16 @@ async function startSync(fid){
     const evQuery = m.query(m.collection(db, 'families', fid, 'events'), m.where('start', '>=', since));
     SY.unsubs.push(m.onSnapshot(evQuery, {includeMetadataChanges: true}, snap => {
       const changes = snap.docChanges().map(c => ({type: c.type, id: c.doc.id, data: c.doc.data()}));
+      if(!SY.foreign && changes.some(c => c.type !== 'removed' && c.data && !EVENT_TYPES.includes(c.data.type))){
+        SY.foreign = true; checkUpdate(0);
+        if(!document.querySelector('.overlay') && tab !== 'set') render();
+      }
       if(applyRemote(S.events, changes, since, S.sync && S.sync.dirty)){
         save();
         if(!document.querySelector('.overlay') && tab !== 'set') render();
         checkNotif();
       }
+      if(!snap.metadata.fromCache) SY.lastRemote = Date.now();
       setSync(snap.metadata.fromCache ? 'offline' : 'ok');
     }, onErr));
     SY.unsubs.push(m.onSnapshot(m.doc(db, 'families', fid), snap => {
@@ -1178,6 +1355,96 @@ function installHTML(){
     ${installEvt ? '<button class="btn small" data-act="install">Installer</button>' : ''}</div>`;
 }
 
+// ---------- Thème et mode nuit doux ----------
+function isSoft(){
+  const st = S.settings.soft, h = new Date().getHours();
+  return st === 'on' || (st !== 'off' && (h >= 21 || h < 7 || !!findOpen(S.events, 'night', Date.now(), 18)));
+}
+function applyTheme(){
+  const r = document.documentElement, theme = S.settings.theme || 'dark', soft = isSoft();
+  r.dataset.theme = theme; r.classList.toggle('soft', soft);
+  const light = theme === 'light' || (theme === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content = soft ? '#06040d' : light ? '#f6f2ff' : '#2a1766';
+}
+
+// ---------- Nouvelle version disponible ----------
+let updateReady = null, lastUpdCheck = 0;
+async function checkUpdate(minGap){
+  if(!/^https?:$/.test(location.protocol) || Date.now() - lastUpdCheck < (minGap || 0)) return;
+  lastUpdCheck = Date.now();
+  try{
+    const r = await fetch('index.html', {cache: 'no-store'});
+    if(!r.ok) return;
+    const m = (await r.text()).match(/const APP_VERSION = '([^']+)'/);
+    if(m && m[1] !== APP_VERSION && updateReady !== m[1]){
+      updateReady = m[1];
+      if(!document.querySelector('.overlay')) render();
+    }
+  }catch(e){}
+}
+function updateHTML(){
+  if(updateReady) return `<div class="warn install"><div><b>Nouvelle version de Doudodo</b><small>Mets à jour pour avoir les dernières nouveautés et rester bien synchronisé avec l'autre téléphone.</small></div>
+    <button class="btn small" data-act="reload">Mettre à jour</button></div>`;
+  if(SY.foreign) return `<div class="warn"><div><b>Doudodo n'est pas à jour sur ce téléphone</b><small>L'autre téléphone a une version plus récente : certaines saisies ne s'affichent pas ici. Ferme complètement l'appli puis rouvre-la avec du réseau.</small></div>
+    ${/^https?:$/.test(location.protocol) ? '<button class="btn small" data-act="reload">Mettre à jour</button>' : ''}</div>`;
+  return '';
+}
+
+// ---------- Croissance ----------
+function lineChart(pts, dec, unit, color, birth, label){
+  const W = 320, HH = 176, L = 38, R = 14, T = 18, B = 28;
+  const t0 = pts[0].t, t1 = Math.max(pts[pts.length - 1].t, t0 + 7 * DAY);
+  let v0 = Math.min(...pts.map(p => p.v)), v1 = Math.max(...pts.map(p => p.v));
+  const padV = Math.max((v1 - v0) * 0.18, unit === 'kg' ? 0.2 : 0.8); v0 -= padV; v1 += padV;
+  const X = t => L + (W - L - R) * (t - t0) / (t1 - t0), Y = v => T + (HH - T - B) * (1 - (v - v0) / (v1 - v0));
+  const xl = t => {
+    if(!birth) return new Date(t).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'});
+    const days = (t - birth) / DAY;
+    return days < 0 ? '' : days < 84 ? Math.round(days / 7) + ' sem.' : fmtNum(days / 30.4375, 1) + ' mois';
+  };
+  let g = '';
+  for(let i = 0; i <= 3; i++){ const v = v0 + (v1 - v0) * i / 3, y = Y(v).toFixed(1); g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" class="gl"/><text x="${L - 6}" y="${y}" class="gy">${fmtNum(v, unit === 'kg' ? 1 : 0)}</text>`; }
+  for(const [t, a] of [[t0, 'start'], [(t0 + t1) / 2, 'middle'], [t1, 'end']]) g += `<text x="${X(t).toFixed(1)}" y="${HH - 8}" class="gx" text-anchor="${a}">${xl(t)}</text>`;
+  const line = pts.map(p => `${X(p.t).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
+  const area = `M${X(pts[0].t).toFixed(1)} ${HH - B}L${line.replace(/ /g, 'L')}L${X(pts[pts.length - 1].t).toFixed(1)} ${HH - B}Z`;
+  const last = pts[pts.length - 1], lx = X(last.t), ly = Y(last.v);
+  return `<svg viewBox="0 0 ${W} ${HH}" class="lchart" role="img" aria-label="${esc(label)}">${g}
+    <path d="${area}" fill="${color}" opacity=".14"/>
+    <polyline points="${line}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map(p => `<circle cx="${X(p.t).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="4" fill="var(--card)" stroke="${color}" stroke-width="2.5"/>`).join('')}
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="6" fill="${color}" style="filter:drop-shadow(0 0 6px ${color})"/>
+    <text x="${Math.min(lx, W - R).toFixed(1)}" y="${(ly - 12).toFixed(1)}" class="lv">${fmtNum(last.v, dec)} ${unit}</text></svg>`;
+}
+function growthHTML(){
+  const name = esc(childName());
+  const list = S.events.filter(e => e.type === 'growth').sort((a,b) => b.start - a.start);
+  const birth = S.child.birth ? new Date(S.child.birth + 'T00:00:00').getTime() : null;
+  const MEAS = [['w', 'Poids', 'kg', 2, 'var(--accent)'], ['h', 'Taille', 'cm', 1, 'var(--med)'], ['hc', 'Périmètre crânien', 'cm', 1, 'var(--pee)']];
+  const short = t => new Date(t).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'});
+  let cards = '', charts = '';
+  for(const [k, label, unit, dec, color] of MEAS){
+    const pts = list.filter(e => e[k] != null).map(e => ({t: e.start, v: e[k]})).reverse();
+    if(!pts.length) continue;
+    const last = pts[pts.length - 1], prev = pts[pts.length - 2];
+    let trend = '';
+    if(prev && last.t - prev.t >= DAY){
+      const days = (last.t - prev.t) / DAY;
+      if(k === 'w'){ const gr = Math.round((last.v - prev.v) * 1000 / days * 7); trend = (gr >= 0 ? '+' : '') + gr + ' g par semaine'; }
+      else { const c = (last.v - prev.v) / days * 30.4375; trend = (c >= 0 ? '+' : '') + fmtNum(c, 1) + ' cm par mois'; }
+      trend += ' depuis le ' + short(prev.t);
+    }
+    cards += `<div class="gcard"><span>${label}</span><b>${fmtNum(last.v, dec)} ${unit}</b><small>le ${short(last.t)}</small>${trend ? `<small class="tr">${trend}</small>` : ''}</div>`;
+    charts += `<h2>${label}</h2><div class="card">${pts.length >= 2 ? lineChart(pts, dec, unit, color, birth, label + ' de ' + childName())
+      : '<p class="note" style="margin:0">Une deuxième mesure permettra de tracer la courbe.</p>'}</div>`;
+  }
+  return `<h1>Croissance</h1><p class="sub">Poids, taille et périmètre crânien de ${name}, par exemple après une pesée ou une visite chez le pédiatre.</p>
+    <button class="btn" data-act="add" data-type="growth" data-lock="1">Ajouter une mesure</button>
+    ${list.length ? `<div class="gcards">${cards}</div>${charts}<h2>Toutes les mesures</h2><div class="card rows">${rowsHTML(list, '')}</div>`
+      : '<div class="card empty" style="margin-top:12px">Aucune mesure pour le moment. Ajoute la dernière pesée, celle du carnet de santé par exemple.</div>'}
+    <p class="note">Les courbes de référence du carnet de santé ne sont pas affichées ici. C'est le pédiatre qui dit si la croissance est normale.</p>`;
+}
+
 // ---------- Actions ----------
 function act(el){
   const a = el.dataset.act, now = Date.now();
@@ -1200,6 +1467,11 @@ function act(el){
   else if(a === 'wake'){ const id = addEvent({type: 'wake', start: now}); render(); toast('Réveil enregistré à ' + fmtT(now), undoAdd(id)); }
   else if(a === 'diaper'){ const id = addEvent({type: 'diaper', start: now, kind: el.dataset.kind}); render(); toast(diaperLabel(el.dataset.kind) + ' noté à ' + fmtT(now), undoAdd(id)); }
   else if(a === 'bottle') openEditor(null, {type: 'bottle', lock: true});
+  else if(a === 'meal'){
+    const kind = el.dataset.kind, id = addEvent({type: 'bottle', kind, start: now}); render();
+    const what = {bottle: 'Biberon noté à ', breast: 'Tétée notée à ', solid: 'Repas solide noté à '}[kind] || 'Repas noté à ';
+    toast(what + fmtT(now), undoAdd(id), {label: kind === 'bottle' ? 'Quantité' : 'Détails', fn: () => openEditor(id)});
+  }
   else if(a === 'add') openEditor(null, {type: el.dataset.type, day: el.dataset.day ? +el.dataset.day : null, lock: !!el.dataset.lock});
   else if(a === 'edit') openEditor(el.dataset.id);
   else if(a === 'prevday'){ const d = new Date(viewDay); d.setDate(d.getDate() - 1); viewDay = d.getTime(); render(); }
@@ -1207,6 +1479,10 @@ function act(el){
   else if(a === 'notif') toggleNotif();
   else if(a === 'install'){ if(installEvt){ installEvt.prompt(); installEvt.userChoice.then(() => { installEvt = null; render(); }); } }
   else if(a === 'hideinstall'){ S.settings.hideInstall = true; save(); render(); }
+  else if(a === 'theme'){ S.settings.theme = el.dataset.v; save(); render(); }
+  else if(a === 'soft'){ S.settings.soft = el.dataset.v; save(); render(); }
+  else if(a === 'reload') location.reload();
+  else if(a === 'syncnow'){ checkUpdate(0); if(S.sync && syncAvailable()) startSync(S.sync.fid).then(() => { toast('Synchronisation relancée'); if(tab === 'set') render(); }); }
   else if(a === 'exportjson') download('doudodo-sauvegarde-' + toInput(now).slice(0, 10) + '.json', 'application/json', JSON.stringify({child: S.child, events: S.events}, null, 1));
   else if(a === 'exportcsv') exportCSV();
   else if(a === 'importjson') $('#importfile').click();
@@ -1243,15 +1519,26 @@ document.addEventListener('change', ev => {
 });
 
 // Rafraîchit l'accueil, vérifie les rappels, fait la copie automatique du jour.
-function tick(){ if(tab === 'home' && !document.querySelector('.overlay')) render(); checkNotif(); autoSnapshot(); }
+function tick(){ if(tab === 'home' && !document.querySelector('.overlay')) render(); checkNotif(); autoSnapshot(); checkUpdate(60 * MIN); }
 setInterval(tick, 30000);
-document.addEventListener('visibilitychange', () => { if(!document.hidden){ if(!document.querySelector('.overlay') && tab !== 'set') render(); checkNotif(); } });
+// Au retour sur l'appli après plus d'une minute, on relance l'écoute du foyer : sur mobile, la connexion
+// peut rester figée après une mise en veille et l'écran ne recevrait plus les saisies de l'autre téléphone.
+let hiddenAt = 0;
+function resume(force){
+  if(S.sync && syncAvailable() && (force || (hiddenAt && Date.now() - hiddenAt > 60000))) startSync(S.sync.fid);
+  hiddenAt = 0;
+  if(!document.querySelector('.overlay') && tab !== 'set') render();
+  checkNotif(); checkUpdate(10 * MIN);
+}
+document.addEventListener('visibilitychange', () => { if(document.hidden) hiddenAt = Date.now(); else resume(false); });
+window.addEventListener('pageshow', e => { if(e.persisted) resume(true); });
 
 autoSnapshot();
 render();
 if(!S.child.birth && S.events.length === 0 && !S.sync){ tab = 'set'; render(); toast('Commence par indiquer la date de naissance'); }
 if(S.sync && syncAvailable()) startSync(S.sync.fid);
 checkNotif();
+setTimeout(() => checkUpdate(0), 4000);
 
 // Mode hors ligne / installation (uniquement quand la page est servie en http ou https)
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
