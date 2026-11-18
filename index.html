@@ -374,6 +374,18 @@ textarea{min-height:90px;resize:vertical}
 .card.atyp .chips{margin-top:10px}
 .atyp-dot{display:inline-block;width:8px;height:8px;margin-left:5px;border-radius:2px;transform:rotate(45deg);background:var(--wake);vertical-align:1px}
 .legend .atyp-dot{margin:0 6px 0 2px}
+
+/* Siestes de la journée */
+.dn-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.dn-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-areas:"head head x" "s to e";align-items:center;gap:8px;padding:10px 12px;border-radius:16px;background:var(--bg);border:1px solid var(--line)}
+.dn-row.off{opacity:.5}
+.dn-head{grid-area:head;display:flex;align-items:center;gap:10px;margin:0;color:var(--text);font-size:16px;font-weight:800;cursor:pointer}
+.dn-on{width:22px;height:22px;margin:0;accent-color:var(--accent)}
+.dn-x{grid-area:x;justify-self:end;width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:800;text-align:center;line-height:1}
+.dn-row .dn-s,.dn-row .dn-e{min-width:0;width:100%;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-weight:700;font-variant-numeric:tabular-nums}
+.dn-s{grid-area:s}.dn-e{grid-area:e}
+.dn-to{grid-area:to;color:var(--muted);font-weight:700}
+.btn[disabled]{opacity:.45;pointer-events:none}
 </style>
 </head>
 <body>
@@ -559,7 +571,7 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
-const APP_VERSION = '2026.11.18-7';
+const APP_VERSION = '2026.11.18-8';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
@@ -764,7 +776,7 @@ function skyHTML(p, now){
     if(p.adjMin <= -5) why += ` Avancé de ${-p.adjMin} min car la dernière sieste a été courte.`;
     if(p.adjMin >= 5) why += ` Retardé de ${p.adjMin} min car la dernière sieste a été longue.`;
     if(atypMarker(startOfDay(now))) why += ' Journée particulière : horaires à prendre avec souplesse, elle ne compte pas dans l\'apprentissage.';
-    if(p.stale) why = `Aucun sommeil noté depuis ${fmtT(p.ref)}. Si ${name} a dormi ailleurs (crèche, voiture, poussette…), ajoute ces siestes dans le journal pour des horaires justes.`;
+    if(p.stale) why = `Aucun sommeil noté depuis ${fmtT(p.ref)}. Si ${name} a dormi ailleurs (crèche, voiture, poussette…), ajoute ses siestes avec le bouton ci-dessus pour des horaires justes.`;
     const evening = new Date(now).getHours() >= 17;
     const second = p.bedtime ? '<button class="ghost" data-act="startnap">C\'est une sieste</button>'
       : evening ? '<button class="ghost" data-act="startnight">C\'est le coucher du soir</button>' : '';
@@ -776,7 +788,7 @@ function skyHTML(p, now){
       <div class="ends"><span>Réveil à ${fmtT(p.ref)}</span><span>Éveil depuis ${fmtD((now - p.ref) / MIN)}</span></div>
       ${p.bedtime ? '<button class="cta" data-act="startnight"><b>Démarrer la nuit</b><small>Enregistre le coucher à l\'heure actuelle</small></button>'
         : '<button class="cta" data-act="startnap"><b>Démarrer la sieste</b><small>Enregistre le début à l\'heure actuelle</small></button>'}
-      <div class="ghosts"><button class="ghost" data-act="add" data-type="${p.bedtime ? 'night' : 'nap'}" data-lock="1">Choisir l'heure</button>${second}</div>
+      <div class="ghosts">${p.stale ? `<button class="ghost" data-act="daynaps" data-day="${startOfDay(now)}">Ajouter les siestes de la journée</button>` : `<button class="ghost" data-act="add" data-type="${p.bedtime ? 'night' : 'nap'}" data-lock="1">Choisir l'heure</button>`}${second}</div>
       <p class="why">${why}</p></section>`;
   }
   return `<section class="sky">
@@ -909,7 +921,9 @@ function logHTML(){
     <div class="card">${clockHTML(viewDay, isToday ? predict(S.events, Date.now(), S.child.birth) : null)}${totalsHTML(viewDay)}</div>
     <div class="card rows">${rowsHTML(list.slice().reverse(), "Rien d'enregistré ce jour-là.")}</div>
     ${atypCardHTML(viewDay)}
-    <button class="btn" data-act="add" data-type="nap" data-day="${viewDay}">Ajouter un évènement oublié</button>`;
+    <button class="btn" data-act="add" data-type="nap" data-day="${viewDay}">Ajouter un évènement oublié</button>
+    <button class="btn sec" data-act="daynaps" data-day="${viewDay}">Ajouter les siestes de la journée</button>
+    <p class="note" style="text-align:center;margin-top:6px">Pratique après une journée à la crèche ou chez la nounou.</p>`;
 }
 
 function barsHTML(items){
@@ -1972,6 +1986,102 @@ function swipeDelete(id){
   checkAch();
 }
 
+// ---------- Siestes de la journée (crèche, nounou…) ----------
+// Propose les siestes habituelles à partir du réveil, sans chevaucher ce qui est déjà noté.
+function proposeDayNaps(ds, now){
+  const model = buildModel(S.events, now, ageMonths(S.child.birth, now));
+  const g = groupByDay(S.events).get(ds) || {naps: [], wake: null};
+  const wake = g.wake ? g.wake.start : null;
+  const wakeGuess = ds + Math.round((model.wakeClock != null ? model.wakeClock : 7 * 60) / 5) * 5 * MIN;
+  const isToday = ds === startOfDay(now);
+  const bedTs = ds + model.bedClock.mean * MIN, limit = isToday ? Math.min(now, bedTs) : bedTs;
+  const r5 = t => Math.round(t / (5 * MIN)) * 5 * MIN;
+  const sleeps = S.events.filter(e => (e.type === 'nap' || e.type === 'night') && e.start < dayEnd(ds) && (e.end || now) > ds);
+  const out = []; let prev = wake || wakeGuess;
+  for(let rank = 1; rank <= 6 && g.naps.length + out.length < Math.max(model.typicalNaps, 1); rank++){
+    const st = r5(prev + model.window(rank).mean * MIN), en = r5(st + model.duration(rank).mean * MIN);
+    if(en > limit - 10 * MIN || st > bedTs - 60 * MIN) break;
+    const clash = sleeps.find(e => e.start < en && (e.end || now) > st);
+    if(clash){ prev = clash.end || now; continue; }
+    out.push({start: st, end: en, on: true}); prev = en;
+  }
+  return {naps: out, wake, wakeGuess};
+}
+const hhmm = t => { const d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const atTime = (ds, v) => { const [h, m] = String(v).split(':').map(Number); if(isNaN(h) || isNaN(m)) return NaN; const d = new Date(ds); d.setHours(h, m, 0, 0); return d.getTime(); };
+function openDayNaps(ds){
+  const now = Date.now(), prop = proposeDayNaps(ds, now);
+  const st = {rows: prop.naps, place: 'Crèche', wake: prop.wake ? null : hhmm(prop.wakeGuess)};
+  const ov = document.createElement('div'); ov.className = 'overlay'; document.body.appendChild(ov);
+  ov.addEventListener('click', ev => { if(ev.target === ov) closeModal(); });
+  const q = s => ov.querySelector(s);
+  const read = () => {
+    ov.querySelectorAll('.dn-row').forEach((r, i) => {
+      const row = st.rows[i]; if(!row) return;
+      row.on = r.querySelector('.dn-on').checked;
+      row.start = atTime(ds, r.querySelector('.dn-s').value); row.end = atTime(ds, r.querySelector('.dn-e').value);
+    });
+    if(q('#dn_wake')) st.wake = q('#dn_wake').value;
+  };
+  const draw = () => {
+    const n = st.rows.filter(r => r.on).length;
+    ov.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><h3>Siestes de la journée</h3>
+      <p class="note" style="margin:0">${esc(dayLabel(ds))}. ${st.rows.length ? "Horaires proposés d'après ses habitudes : ajuste-les si tu les connais (cahier de la crèche, message de la nounou)." : "Aucune sieste à proposer pour ce jour. Ajoute-les une par une."}</p>
+      ${st.wake != null ? `<label for="dn_wake">Réveil du matin</label><input type="time" id="dn_wake" value="${esc(st.wake)}">` : ''}
+      <div class="dn-list">${st.rows.map((r, i) => `<div class="dn-row${r.on ? '' : ' off'}">
+        <label class="dn-head"><input type="checkbox" class="dn-on"${r.on ? ' checked' : ''}><span class="dn-n">Sieste ${i + 1}</span></label>
+        <input type="time" class="dn-s" aria-label="Début de la sieste ${i + 1}" value="${isNaN(r.start) ? '' : hhmm(r.start)}">
+        <span class="dn-to" aria-hidden="true">à</span>
+        <input type="time" class="dn-e" aria-label="Fin de la sieste ${i + 1}" value="${isNaN(r.end) ? '' : hhmm(r.end)}">
+        <button class="dn-x" data-dnx="${i}" aria-label="Retirer la sieste ${i + 1}">×</button></div>`).join('')}</div>
+      <button class="btn sec small" id="dn_add">Ajouter une sieste</button>
+      <label>Lieu de la sieste</label>
+      <div class="seg">${['Crèche', 'Nounou', 'Grands-parents', 'Ne pas préciser'].map(x => `<button data-dnp="${x}" class="${st.place === x ? 'on' : ''}">${x}</button>`).join('')}</div>
+      <button class="btn" id="dn_save"${n ? '' : ' disabled'}>${n ? 'Enregistrer ' + (n > 1 ? 'les ' + n + ' siestes' : 'la sieste') : 'Aucune sieste cochée'}</button>
+      <button class="btn sec small" id="dn_cancel">Fermer sans enregistrer</button></div>`;
+    ov.querySelectorAll('.dn-on').forEach(c => c.onchange = () => { read(); draw(); });
+    ov.querySelectorAll('[data-dnx]').forEach(b => b.onclick = () => { read(); st.rows.splice(+b.dataset.dnx, 1); fb('tap'); draw(); });
+    ov.querySelectorAll('[data-dnp]').forEach(b => b.onclick = () => { read(); st.place = b.dataset.dnp; fb('tap'); draw(); });
+    q('#dn_add').onclick = () => {
+      read();
+      const last = st.rows.filter(r => !isNaN(r.end)).map(r => r.end).sort((a, b) => b - a)[0];
+      const s0 = last ? last + 2 * H : atTime(ds, st.wake || hhmm(prop.wakeGuess)) + 2 * H;
+      st.rows.push({start: s0, end: s0 + H, on: true}); fb('tap'); draw();
+    };
+    q('#dn_cancel').onclick = closeModal;
+    q('#dn_save').onclick = () => {
+      read();
+      const rows = st.rows.filter(r => r.on), now = Date.now();
+      for(const [i, r] of st.rows.entries()){
+        if(!r.on) continue;
+        const name = 'Sieste ' + (i + 1);
+        if(isNaN(r.start) || isNaN(r.end)){ refuse(name + ' : indique le début et la fin'); return; }
+        if(r.end <= r.start){ refuse(name + ' : la fin doit être après le début'); return; }
+        if(r.end - r.start > 4 * H){ refuse(name + ' : plus de 4 heures, vérifie les horaires'); return; }
+        if(r.end > now + 5 * MIN){ refuse(name + " : l'heure de fin est dans le futur"); return; }
+        const clash = S.events.find(e => (e.type === 'nap' || e.type === 'night') && e.start < r.end && (e.end || now) > r.start);
+        if(clash){ refuse(name + ' : chevauche « ' + eventInfo(clash).main + ' » de ' + fmtT(clash.start)); return; }
+        const other = rows.find(o => o !== r && o.start < r.end && o.end > r.start);
+        if(other){ refuse(name + ' : chevauche une autre sieste de la liste'); return; }
+      }
+      let wakeTs = null;
+      if(st.wake != null){
+        wakeTs = atTime(ds, st.wake);
+        if(isNaN(wakeTs)){ refuse("Indique l'heure du réveil du matin"); return; }
+        if(rows.some(r => r.start < wakeTs)){ refuse('Une sieste commence avant le réveil du matin'); return; }
+      }
+      const ids = [];
+      if(wakeTs != null) ids.push(addEvent({type: 'wake', start: wakeTs}));
+      const note = st.place === 'Ne pas préciser' ? null : st.place;
+      for(const r of rows) ids.push(addEvent({type: 'nap', start: r.start, end: r.end, ...(note ? {note} : {})}));
+      closeModal(); fb('save');
+      toast((rows.length > 1 ? rows.length + ' siestes ajoutées' : 'Sieste ajoutée') + (note ? ' (' + note.toLowerCase() + ')' : ''), () => { ids.forEach(delEvent); checkAch(); });
+      checkAch(); checkNotif();
+    };
+  };
+  draw();
+}
+
 // ---------- Actions ----------
 function act(el){
   const a = el.dataset.act, now = Date.now();
@@ -2016,6 +2126,7 @@ function act(el){
   else if(a === 'soft'){ S.settings.soft = el.dataset.v; save(); render(); fb('tap'); }
   else if(a === 'reload') location.reload();
   else if(a === 'tuto') openOnboarding('tuto');
+  else if(a === 'daynaps') openDayNaps(+el.dataset.day);
   else if(a === 'atyp'){ const ds = +el.dataset.day, on = !atypMarker(ds); setAtypical(ds, on, []); render(); fb(on ? 'save' : 'undo'); toast(on ? 'Journée marquée comme particulière' : 'Journée de nouveau normale'); }
   else if(a === 'atypr'){
     const ds = +el.dataset.day, m = atypMarker(ds), r = el.dataset.r;
