@@ -386,6 +386,10 @@ textarea{min-height:90px;resize:vertical}
 .dn-s{grid-area:s}.dn-e{grid-area:e}
 .dn-to{grid-area:to;color:var(--muted);font-weight:700}
 .btn[disabled]{opacity:.45;pointer-events:none}
+.onb-body p.onb-small{font-size:13px;color:rgba(230,220,255,.78);margin-top:14px;line-height:1.45}
+.onb-small a{color:#fff;text-decoration:underline;text-underline-offset:2px}
+a.btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box}
+.grecaptcha-badge{visibility:hidden}
 </style>
 </head>
 <body>
@@ -571,7 +575,7 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
-const APP_VERSION = '2026.11.18-8';
+const APP_VERSION = '2026.11.18-9';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
@@ -1022,10 +1026,20 @@ function settingsHTML(){
       <div class="note">Les principaux gestes de Doudodo en cinq écrans.</div>
       <button class="btn sec small" data-act="tuto">Revoir le tutoriel</button>
     </div>
+    <h2>À propos</h2>
+    <div class="card">
+      <div class="note">${MEDICAL_NOTE}</div>
+      <div class="note" style="margin-top:8px">Pas de compte, pas de publicité, aucun suivi. Les données restent sur ce téléphone, et dans le foyer partagé si tu en as créé un.</div>
+      ${APPCHECK_SITE_KEY ? '<div class="note" style="margin-top:8px">Ce service est protégé par reCAPTCHA : les règles de confidentialité et conditions d\'utilisation de Google s\'appliquent.</div>' : ''}
+      <a class="btn sec small" href="${PRIVACY_URL}" target="_blank" rel="noopener">Politique de confidentialité</a>
+    </div>
     <h2>Zone sensible</h2>
     <div class="card">
-      <div class="note">Efface le profil et les ${S.events.length} évènement${S.events.length > 1 ? 's' : ''} de ce téléphone. Impossible à annuler.</div>
-      <button class="btn danger small" data-act="wipe">Tout effacer sur ce téléphone</button>
+      ${S.sync
+        ? `<div class="note">Supprime définitivement le foyer partagé et toutes ses données sur le serveur, puis efface ce téléphone. L'autre téléphone du foyer sera vidé aussi dès qu'il sera connecté. Impossible à annuler.</div>
+      <button class="btn danger small" data-act="wipeall">Supprimer toutes nos données</button>`
+        : `<div class="note">Efface le profil et les ${S.events.length} évènement${S.events.length > 1 ? 's' : ''} de ce téléphone. Impossible à annuler.</div>
+      <button class="btn danger small" data-act="wipe">Tout effacer sur ce téléphone</button>`}
     </div>
     <p class="note" style="text-align:center;margin-top:18px">Doudodo, version ${APP_VERSION}</p>`;
 }
@@ -1304,6 +1318,10 @@ const FIREBASE_CONFIG = {
   appId: '1:612628829195:web:2a401c80ef9a57604ea30e'
 };
 const FB_VER = '10.14.1', SYNC_DAYS = 30;
+// App Check (protection contre les abus) : coller ici la clé de site reCAPTCHA v3 pour l'activer. Vide = désactivé.
+const APPCHECK_SITE_KEY = '';
+const PRIVACY_URL = 'privacy.html';
+const MEDICAL_NOTE = "Les horaires proposés par Doudodo sont des repères indicatifs, calculés à partir de l'âge et de vos saisies. Ce n'est pas un avis médical : en cas de doute sur la santé ou le sommeil de ton enfant, demande à ton médecin ou à ton pédiatre.";
 const SY = {state: 'off', msg: '', db: null, m: null, unsubs: [], lastRemote: 0, foreign: false};
 const syncAvailable = () => !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('délai dépassé'), {code: 'timeout'})), ms))]);
@@ -1356,6 +1374,12 @@ async function loadFirebase(){
   const base = 'https://www.gstatic.com/firebasejs/' + FB_VER + '/';
   const [appM, fs] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-firestore.js')]);
   const app = appM.initializeApp(FIREBASE_CONFIG);
+  if(APPCHECK_SITE_KEY){
+    try{
+      const ac = await import(base + 'firebase-app-check.js');
+      ac.initializeAppCheck(app, {provider: new ac.ReCaptchaV3Provider(APPCHECK_SITE_KEY), isTokenAutoRefreshEnabled: true});
+    }catch(e){ console.error('App Check', e); }
+  }
   let db;
   try{ db = fs.initializeFirestore(app, {localCache: fs.persistentLocalCache({tabManager: fs.persistentMultipleTabManager()})}); }
   catch(e){ db = fs.getFirestore(app); }
@@ -1436,7 +1460,12 @@ async function startSync(fid){
     }, onErr));
     SY.unsubs.push(m.onSnapshot(m.doc(db, 'families', fid), snap => {
       const d = snap.data();
-      if(!d) return;
+      if(!d){
+        // Foyer supprimé depuis l'autre téléphone (le foyer avait déjà été vu sur le serveur) : on vide ce téléphone aussi.
+        if(S.sync && S.sync.fid === fid && S.sync.seen && !(snap.metadata && snap.metadata.fromCache)) familyGone();
+        return;
+      }
+      if(S.sync && S.sync.fid === fid && !S.sync.seen){ S.sync.seen = 1; save(); }
       const nm = d.name || '', bd = d.birth || '';
       if(nm !== S.child.name || bd !== S.child.birth){
         S.child.name = nm; S.child.birth = bd; save();
@@ -1506,6 +1535,42 @@ async function fetchHistory(){
     if(applyRemote(S.events, changes, 0, S.sync.dirty)) save();
     render(); toast(changes.length + ' évènements dans le foyer, historique à jour');
   }catch(e){ console.error(e); toast('Récupération impossible (' + syncErr(e) + ')'); }
+}
+function wipeLocal(){
+  S = {child: {name: '', birth: ''}, events: [], settings: S.settings, sync: null};
+  try{ localStorage.removeItem('dodo.bak'); localStorage.removeItem('dodo.bak2'); }catch(e){}
+  save(); syncSleepNotif();
+}
+function familyGone(){
+  stopSync(); wipeLocal(); tab = 'home'; render();
+  toast('Le foyer a été supprimé depuis l\'autre téléphone : les données ont été effacées ici aussi');
+}
+// Suppression complète (droit à l'effacement) : tous les évènements du foyer, puis le foyer, puis ce téléphone.
+async function deleteFamily(){
+  if(!S.sync) return;
+  if(!confirm('Supprimer définitivement toutes vos données, sur le serveur et sur ce téléphone ? L\'autre téléphone du foyer sera vidé aussi. Pense à télécharger une sauvegarde avant.')) return;
+  if(!confirm('Dernière confirmation : tout supprimer pour de bon ?')) return;
+  const fid = S.sync.fid;
+  try{
+    toast('Suppression en cours…');
+    await withTimeout(loadFirebase(), 15000);
+    stopSync();
+    const {m, db} = SY;
+    const snap = await withTimeout(m.getDocs(m.collection(db, 'families', fid, 'events')), 30000);
+    const refs = snap.docs.map(d => m.doc(db, 'families', fid, 'events', d.id));
+    for(let i = 0; i < refs.length; i += 400){
+      const b = m.writeBatch(db);
+      refs.slice(i, i + 400).forEach(r => b.delete(r));
+      await withTimeout(b.commit(), 30000);
+    }
+    await withTimeout(m.deleteDoc(m.doc(db, 'families', fid)), 15000);
+    wipeLocal(); tab = 'home'; render(); fb('undo');
+    toast('Toutes vos données ont été supprimées');
+  }catch(e){
+    console.error(e);
+    if(S.sync) startSync(S.sync.fid);
+    refuse('Suppression impossible (' + syncErr(e) + '). Vérifie le réseau et réessaie.');
+  }
 }
 function leaveFamily(){
   if(!confirm('Quitter le foyer ? Les données restent sur ce téléphone mais ne sont plus partagées.')) return;
@@ -1867,7 +1932,8 @@ function drawOnb(){
   const step = OB.steps[OB.i], n = OB.steps.length, last = OB.i === n - 1, tutoStep = step[0] === 't';
   let body = '', actions = '';
   if(step === 'welcome'){
-    body = `${onbArt('welcome')}<h2>Bienvenue dans Doudodo</h2><p>Doudodo t'aide à trouver le bon moment pour la sieste, et à noter repas et couches en un appui.</p>`;
+    body = `${onbArt('welcome')}<h2>Bienvenue dans Doudodo</h2><p>Doudodo t'aide à trouver le bon moment pour la sieste, et à noter repas et couches en un appui.</p>
+      <p class="onb-small">Les horaires proposés sont des repères, pas un avis médical. Pas de compte, pas de publicité. <a href="${PRIVACY_URL}" target="_blank" rel="noopener">Confidentialité</a></p>`;
     actions = '<button class="cta" data-ob="next"><b>Commencer</b></button>';
   } else if(step === 'share'){
     if(S.sync){
@@ -2143,10 +2209,11 @@ function act(el){
   else if(a === 'syncleave') leaveFamily();
   else if(a === 'synccopy'){ navigator.clipboard.writeText(S.sync.fid).then(() => toast('Code copié'), () => prompt('Copie ce code :', S.sync.fid)); }
   else if(a === 'syncshare'){ navigator.share({text: 'Code Doudodo : ' + S.sync.fid}).catch(() => {}); }
+  else if(a === 'wipeall') deleteFamily();
   else if(a === 'wipe'){
     if(S.sync){ refuse("Quitte d'abord le foyer pour tout effacer"); return; }
     if(confirm('Effacer TOUTES les données de ce téléphone ? Pense à télécharger une sauvegarde avant.') && confirm('Vraiment tout effacer ?')){
-      S = {child: {name: '', birth: ''}, events: [], settings: S.settings}; save(); render();
+      wipeLocal(); render(); toast('Données effacées sur ce téléphone');
     }
   }
   checkNotif(); checkAch();
