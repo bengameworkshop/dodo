@@ -1,5 +1,5 @@
 // Service worker de Dodo : ouverture hors ligne et clic sur les rappels.
-const CACHE = 'dodo-v2';
+const CACHE = 'dodo-v3';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -38,11 +38,15 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// Un appui sur un rappel ouvre (ou ramène au premier plan) l'appli.
+// Appui sur une notification : ouvre l'appli ; le bouton « Terminer » termine la sieste ou la nuit.
 self.addEventListener('notificationclick', e => {
+  const action = e.action;
   e.notification.close();
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-    for (const c of list) if ('focus' in c) return c.focus();
-    return self.clients.openWindow('./');
+    for (const c of list) {
+      if (action) c.postMessage({ do: action });
+      if ('focus' in c) return c.focus();
+    }
+    return self.clients.openWindow(action ? './?do=' + action : './');
   }));
 });
