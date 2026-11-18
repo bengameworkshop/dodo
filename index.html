@@ -554,7 +554,7 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
-const APP_VERSION = '2026.11.18-5';
+const APP_VERSION = '2026.11.18-6';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
@@ -1399,6 +1399,16 @@ async function startSync(fid){
       }
       if(!snap.metadata.fromCache) SY.lastRemote = Date.now();
       setSync(snap.metadata.fromCache ? 'offline' : 'ok');
+    }, onErr));
+    // Les mesures de croissance sont souvent recopiées du carnet de santé avec leur date d'origine :
+    // on les synchronise toutes, quelle que soit leur ancienneté (elles sont peu nombreuses).
+    const growthQuery = m.query(m.collection(db, 'families', fid, 'events'), m.where('type', '==', 'growth'));
+    SY.unsubs.push(m.onSnapshot(growthQuery, snap => {
+      const changes = snap.docChanges().map(c => ({type: c.type, id: c.doc.id, data: c.doc.data()}));
+      if(applyRemote(S.events, changes, 0, S.sync && S.sync.dirty)){
+        save(); setTimeout(checkAch, 400);
+        if(!document.querySelector('.overlay') && tab !== 'set') render();
+      }
     }, onErr));
     SY.unsubs.push(m.onSnapshot(m.doc(db, 'families', fid), snap => {
       const d = snap.data();
