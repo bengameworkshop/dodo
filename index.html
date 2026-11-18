@@ -69,7 +69,7 @@ h2{font-size:18px;margin:26px 0 6px;font-weight:800}
 .path{position:relative;height:34px;margin:18px 12px 4px}
 .path .rail{position:absolute;left:-12px;right:-12px;top:14px;height:6px;border-radius:3px;background:rgba(255,255,255,.18)}
 .path .zone{position:absolute;top:8px;height:18px;border-radius:9px;background:rgba(255,255,255,.22);border:2px solid #fff;box-shadow:0 0 14px rgba(255,255,255,.45)}
-.path .done{position:absolute;left:-12px;top:14px;height:6px;border-radius:3px;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.7)}
+.path .done{position:absolute;overflow:hidden;left:-12px;top:14px;height:6px;border-radius:3px;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.7)}
 .path .me{position:absolute;top:8px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#fff;box-shadow:0 0 0 6px rgba(255,255,255,.2),0 0 20px 8px rgba(255,255,255,.6)}
 .ends{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:#d5c8f7;margin-bottom:2px}
 .cta{display:block;width:100%;margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(180deg,#fff,#efe6ff);color:#4a1fb8;text-align:center;box-shadow:0 12px 28px -10px rgba(255,255,255,.55),inset 0 -2px 0 rgba(106,59,224,.14)}
@@ -89,7 +89,7 @@ h2{font-size:18px;margin:26px 0 6px;font-weight:800}
 .learn .head b{flex:1;font-size:16px}
 .learn .pct{font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
 .bar{height:8px;border-radius:4px;background:var(--raised);margin:10px 0 8px;overflow:hidden}
-.bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),#c9a8ff);box-shadow:0 0 10px var(--glow)}
+.bar i{display:block;position:relative;overflow:hidden;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),#c9a8ff);box-shadow:0 0 10px var(--glow)}
 .learn.done{display:flex;gap:10px;align-items:center;font-weight:700;font-size:15px}
 
 .tile{display:flex;align-items:center;gap:12px;width:100%;border-radius:18px;padding:12px 14px;margin-bottom:8px}
@@ -191,7 +191,7 @@ textarea{min-height:90px;resize:vertical}
 .switch button::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:left .15s}
 .switch button.on{background:var(--accent);box-shadow:0 0 14px var(--glow)}.switch button.on::after{left:27px}
 
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom));background:#2a1766;color:#fff;padding:13px 16px;border-radius:16px;z-index:30;display:flex;gap:14px;align-items:center;font-size:15px;font-weight:600;box-shadow:0 10px 30px -6px rgba(60,20,150,.7);max-width:92vw;border:1px solid rgba(255,255,255,.16)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom));background:#2a1766;color:#fff;padding:13px 16px;border-radius:16px;z-index:30;display:flex;gap:14px;align-items:center;font-size:15px;font-weight:600;box-shadow:0 10px 30px -6px rgba(60,20,150,.7);width:max-content;max-width:calc(100vw - 32px);box-sizing:border-box;border:1px solid rgba(255,255,255,.16)}
 .toast button{color:#d9c8ff;font-weight:800}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:16px;letter-spacing:.03em;word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
 /* Horloge de la journée */
@@ -273,6 +273,60 @@ textarea{min-height:90px;resize:vertical}
 :root.soft .toast{background:#140e26;color:#c4b4f2;box-shadow:none}
 :root.soft nav{background:#0b0716}
 :root.soft img,:root.soft .ic{filter:saturate(.75)}
+
+/* Confirmation : petite notification qui glisse */
+.toast{animation:toastin .3s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes toastin{from{transform:translate(-50%,18px);opacity:0}}
+.tx-ic{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.18);font-style:normal;font-weight:900;font-size:15px}
+.tx-ic svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.tx-ic.err{background:#ff8fa3;color:#3a0010}
+
+/* Reflet discret sur les barres de progression */
+.bar i::after,.path .done::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent) no-repeat;background-size:70px 100%;animation:sheen 3.8s ease-in-out infinite}
+@keyframes sheen{0%{background-position:-70px 0}55%,100%{background-position:calc(100% + 70px) 0}}
+:root.soft .bar i::after,:root.soft .path .done::after{opacity:.3}
+
+/* Le doudou vivant */
+.top .dd-btn{flex:none;width:66px;height:66px;padding:0;border-radius:19px;box-shadow:0 8px 22px -6px var(--glow);cursor:pointer}
+.top .dd-btn svg{width:66px;height:66px;border-radius:19px;display:block;box-shadow:none}
+.say{display:inline-block;margin-top:5px;padding:4px 11px;border-radius:12px 12px 12px 4px;background:var(--accent-soft);color:var(--text);font-size:14px;font-weight:600}
+.dd{overflow:visible}
+.dd-body{transform-box:fill-box;transform-origin:50% 85%;animation:ddbreath 4.2s ease-in-out infinite}
+.dd.asleep .dd-body{animation-duration:5.6s}
+@keyframes ddbreath{50%{transform:scale(1.045)}}
+.dd-eyes{transform-box:fill-box;transform-origin:center;animation:ddblink 5s infinite}
+@keyframes ddblink{0%,44%,48%,100%{transform:scaleY(1)}46%{transform:scaleY(.1)}}
+.dd-mouth{transform-box:fill-box;transform-origin:center;animation:ddyawn 5s ease-in-out infinite}
+@keyframes ddyawn{0%,52%,100%{transform:scale(.55,.4)}66%,84%{transform:scale(1.1,1.35)}}
+.dd-star{transform-box:fill-box;transform-origin:center;animation:twinkle 3.2s ease-in-out infinite}
+@keyframes twinkle{50%{opacity:.3;transform:scale(.6)}}
+.dd.wiggle{animation:ddwiggle .7s ease}
+@keyframes ddwiggle{15%{transform:rotate(-10deg) scale(1.08)}35%{transform:rotate(8deg)}55%{transform:rotate(-5deg)}75%{transform:rotate(2deg)}}
+
+/* Notification de badge */
+.ach{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top, 0px));transform:translateX(-50%);z-index:40;width:max-content;max-width:calc(100vw - 32px);box-sizing:border-box;display:flex;gap:14px;align-items:center;padding:14px 20px 14px 14px;border-radius:22px;color:#fff;cursor:pointer;
+  background:linear-gradient(150deg,#8b5cf6,#5a2bd0 60%,#3a168f);box-shadow:0 18px 40px -12px rgba(90,43,208,.85),inset 0 1px 0 rgba(255,255,255,.3);animation:achin .55s cubic-bezier(.2,.9,.3,1.25)}
+.ach.out{animation:achout .35s ease forwards}
+@keyframes achin{from{transform:translate(-50%,-34px) scale(.9);opacity:0}}
+@keyframes achout{to{transform:translate(-50%,-34px);opacity:0}}
+.ach .medal{position:relative;flex:none;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:#5b2fc7;background:radial-gradient(circle at 35% 30%,#fff,#ece2ff 60%,#c9b2ff);box-shadow:0 0 24px rgba(255,255,255,.6)}
+.ach .medal svg,.badge .medal svg{width:28px;height:28px;fill:currentColor;fill-opacity:.2;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ach small{display:block;font-size:13px;font-weight:700;color:#e4d9ff}
+.ach b{display:block;font-size:17px;font-weight:800}
+.ach .d{display:block;font-size:14px;color:#e4d9ff}
+.ach .spark{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff;opacity:0;animation:spark 1s ease-out forwards}
+@keyframes spark{0%{opacity:1;transform:rotate(var(--a)) translateY(-14px) scale(1)}100%{opacity:0;transform:rotate(var(--a)) translateY(-50px) scale(.3)}}
+:root.soft .ach{background:linear-gradient(150deg,#2a1f55,#160f30);box-shadow:none;color:#d5c8f7}
+
+/* Liste des badges */
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.badge{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:5px}
+.badge .medal{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--raised);color:var(--muted)}
+.badge .medal svg{width:22px;height:22px}
+.badge.on .medal{background:radial-gradient(circle at 35% 30%,#fff,#ece2ff 60%,#c9b2ff);color:#5b2fc7;box-shadow:0 0 16px var(--glow)}
+.badge b{font-size:15px;font-weight:800;line-height:1.2}
+.badge:not(.on) b{color:var(--muted)}
+.badge small{font-size:13px;color:var(--muted);line-height:1.3}
 </style>
 </head>
 <body>
@@ -447,13 +501,13 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
-const APP_VERSION = '2026.11.17-3';
+const APP_VERSION = '2026.11.18-1';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
   try{ r = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
   if(!r || !Array.isArray(r.events)) r = {child: {name: '', birth: ''}, events: []};
-  r.settings = Object.assign({notif: false, lead: 15, theme: 'dark', soft: 'auto'}, r.settings || {});
+  r.settings = Object.assign({notif: false, lead: 15, theme: 'dark', soft: 'auto', sound: true, haptic: true}, r.settings || {});
   return r;
 }
 let S = load();
@@ -578,6 +632,7 @@ function render(){
   else app.innerHTML = settingsHTML();
   const upd = updateHTML();
   if(upd) app.insertAdjacentHTML('afterbegin', upd);
+  syncAnims();
   $('#nav').innerHTML = NAV.map(([k, l, p]) =>
     `<button class="${tab === k ? 'on' : ''}" data-act="tab" data-tab="${k}"${tab === k ? ' aria-current="page"' : ''}><span><svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg></span>${l}</button>`).join('');
 }
@@ -754,13 +809,14 @@ function homeHTML(){
   const todayEv = eventsOfDay(today);
   const quick = (act, kind, cls, ic, label) => `<button class="tile" data-act="${act}" data-kind="${kind}"><span class="ic ${cls}">${ic}</span><b>${label}</b></button>`;
   const last = [lm ? 'dernier repas ' + agoText(lm.start) + ' (' + esc(mealText(lm)) + ')' : '', ld ? 'dernière couche ' + agoText(ld.start) + ' (' + diaperLabel(ld.kind).toLowerCase() + ')' : ''].filter(Boolean).join(', ');
-  return `<header class="top">${LOGO_SVG}<div><div class="brand">${esc(S.child.name || 'Doudodo')}</div>
-      <div class="who">${age ? esc(age) : '<a href="#" data-act="tab" data-tab="set">Indique sa date de naissance</a>'}${syncBadge()}</div></div></header>
+  const [mood, say] = doudouMood(p, now);
+  return `<header class="top"><button class="dd-btn" data-act="doudou" aria-label="Doudou : ${esc(say)}">${doudouSVG(mood)}</button><div><div class="brand">${esc(S.child.name || 'Doudodo')}</div>
+      <div class="who">${age ? esc(age) : '<a href="#" data-act="tab" data-tab="set">Indique sa date de naissance</a>'}${syncBadge()}</div><div class="say">${esc(say)}</div></div></header>
     ${installHTML()}${warnHTML(now)}
     ${skyHTML(p, now)}
     ${learnHTML(now)}
     <h2>Noter un repas ou une couche</h2>
-    <p class="hint">Un appui enregistre à l'heure actuelle. La quantité, le côté ou une note s'ajoutent ensuite si tu veux, en touchant la ligne.</p>
+    <p class="hint">Un appui enregistre à l'heure actuelle. Pour ajouter une quantité ou une note, touche ensuite la ligne dans le journal.</p>
     <div class="tiles3">${quick('meal', 'bottle', 'meal', icon('bottle'), 'Biberon')}${quick('meal', 'breast', 'meal', icon('heart'), 'Tétée')}${quick('meal', 'solid', 'meal', icon('bowl'), 'Solide')}</div>
     <div class="tiles3">${quick('diaper', 'pee', 'pee', icon('drop'), 'Pipi')}${quick('diaper', 'poop', 'poop', icon('poop'), 'Caca')}${quick('diaper', 'both', 'poop two', icon('drop') + icon('poop'), 'Les deux')}</div>
     ${last ? `<p class="hint">${last.charAt(0).toUpperCase() + last.slice(1)}.</p>` : ''}
@@ -827,6 +883,7 @@ function statsHTML(){
     <div class="card">${acc.n >= 5 ? `<div class="big">${Math.round(acc.mae)} min d'écart</div>
       <p class="note" style="margin:6px 0 0">Écart moyen entre l'heure conseillée et le début réel, sur les ${acc.n} dernières siestes. ${acc.hit} % ont commencé dans le créneau conseillé. Ce chiffre est flatteur si tu suis les conseils de l'appli.</p>`
       : '<p class="note" style="margin:0">Pas encore assez de siestes enregistrées pour mesurer la fiabilité (il en faut au moins 5).</p>'}</div>
+    ${badgesHTML()}
     <h2>Ce que Doudodo a appris</h2>
     ${learnHTML(now)}
     <div class="card"><table><tr><th>Sieste</th><th>Éveil selon l'âge</th><th>Éveil observé</th><th>Durée de sieste</th></tr>${learn}</table>
@@ -849,6 +906,13 @@ function settingsHTML(){
       <label>Mode nuit doux</label>
       <div class="seg">${[['auto', 'Automatique'], ['on', 'Toujours'], ['off', 'Jamais']].map(([k, l]) => `<button data-act="soft" data-v="${k}" class="${S.settings.soft === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="note" style="margin-top:8px">Écran très sombre et moins lumineux, pour noter un biberon la nuit sans s'éblouir ni réveiller bébé. En automatique : de 21 h à 7 h, et pendant une nuit en cours.${isSoft() ? ' Actif en ce moment.' : ''}</div>
+    </div>
+    <h2>Sons et vibrations</h2>
+    <div class="card">
+      <div class="switch"><div><b>Sons</b><span class="note">Un son doux confirme chaque action. Plus discret en mode nuit doux.</span></div>
+        <button class="${S.settings.sound ? 'on' : ''}" data-act="sound" role="switch" aria-checked="${!!S.settings.sound}" aria-label="Sons"></button></div>
+      <div class="switch" style="margin-top:14px"><div><b>Vibrations</b><span class="note">Une petite vibration à chaque saisie (Android).</span></div>
+        <button class="${S.settings.haptic ? 'on' : ''}" data-act="haptic" role="switch" aria-checked="${!!S.settings.haptic}" aria-label="Vibrations"></button></div>
     </div>
     <h2>Rappels</h2>
     <div class="card">
@@ -880,12 +944,12 @@ function settingsHTML(){
 
 // ---------- Toast ----------
 let toastTimer;
-function toast(msg, undo, extra){
+function toast(msg, undo, extra, kind){
   document.querySelectorAll('.toast').forEach(t => t.remove());
   const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
-  t.innerHTML = `<span>${esc(msg)}</span>${extra ? `<button class="tx-extra">${esc(extra.label)}</button>` : ''}${undo ? '<button class="tx-undo">Annuler</button>' : ''}`;
+  t.innerHTML = `<i class="tx-ic${kind === 'error' ? ' err' : ''}" aria-hidden="true">${kind === 'error' ? '!' : '<svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9"/></svg>'}</i><span>${esc(msg)}</span>${extra ? `<button class="tx-extra">${esc(extra.label)}</button>` : ''}${undo ? '<button class="tx-undo">Annuler</button>' : ''}`;
   if(extra) t.querySelector('.tx-extra').onclick = () => { t.remove(); extra.fn(); };
-  if(undo) t.querySelector('.tx-undo').onclick = () => { undo(); t.remove(); render(); };
+  if(undo) t.querySelector('.tx-undo').onclick = () => { undo(); t.remove(); fb('undo'); render(); };
   document.body.appendChild(t);
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), extra ? 7000 : 5000);
 }
@@ -950,17 +1014,17 @@ function openEditor(id, preset){
     ov.querySelectorAll('[data-ml]').forEach(b => b.onclick = () => { sync(); d.ml = d.ml ? Math.max(0, d.ml + parseInt(b.dataset.ml)) : lastMl(); draw(); });
     ov.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { sync(); d.val = Math.round(((d.val || 37) + parseFloat(b.dataset.tv)) * 10) / 10; q('#f_val').value = d.val; });
     q('#f_cancel').onclick = closeModal;
-    if(existing) q('#f_del').onclick = () => { if(confirm('Supprimer cet évènement ?')){ delEvent(existing.id); closeModal(); toast('Évènement supprimé'); } };
+    if(existing) q('#f_del').onclick = () => { if(confirm('Supprimer cet évènement ?')){ delEvent(existing.id); closeModal(); fb('undo'); toast('Évènement supprimé'); checkAch(); } };
     q('#f_save').onclick = () => {
       sync();
       const now = Date.now(), t = d.type, clean = {type: t, start: d.start};
       // Garde-fous
-      if(!(d.start > 0)){ toast('Indique une heure'); return; }
-      if(d.start > now + 5 * MIN){ toast("Cette heure est dans le futur"); return; }
+      if(!(d.start > 0)){ refuse('Indique une heure'); return; }
+      if(d.start > now + 5 * MIN){ refuse("Cette heure est dans le futur"); return; }
       if(SPAN[t]){
         clean.end = d.end || null;
-        if(d.end && d.end <= d.start){ toast('La fin doit être après le début'); return; }
-        if(d.end && d.end > now + 5 * MIN){ toast("L'heure de fin est dans le futur"); return; }
+        if(d.end && d.end <= d.start){ refuse('La fin doit être après le début'); return; }
+        if(d.end && d.end > now + 5 * MIN){ refuse("L'heure de fin est dans le futur"); return; }
         const dur = ((d.end || now) - d.start) / H;
         if(t === 'nap' && dur > 4 && !confirm('Cette sieste dure ' + fmtD(dur * 60) + '. Est-ce bien exact ?')) return;
         if(t === 'night' && dur > 16 && !confirm('Cette nuit dure ' + fmtD(dur * 60) + '. Est-ce bien exact ?')) return;
@@ -980,17 +1044,17 @@ function openEditor(id, preset){
       }
       if(t === 'diaper') clean.kind = d.kind;
       if(t === 'temp'){
-        if(!(d.val >= 34 && d.val <= 43)){ toast('Température entre 34 et 43 °C attendue'); return; }
+        if(!(d.val >= 34 && d.val <= 43)){ refuse('Température entre 34 et 43 °C attendue'); return; }
         clean.val = Math.round(d.val * 10) / 10;
       }
       if(t === 'growth'){
         let {w, h, hc} = d;
-        if([w, h, hc].some(v => v != null && isNaN(v))){ toast('Un des nombres est mal écrit'); return; }
+        if([w, h, hc].some(v => v != null && isNaN(v))){ refuse('Un des nombres est mal écrit'); return; }
         if(w != null && w >= 500) w = w / 1000;   // saisi en grammes
-        if(w == null && h == null && hc == null){ toast('Indique au moins une mesure'); return; }
-        if(w != null && !(w >= 1 && w <= 30)){ toast('Poids entre 1 et 30 kg attendu'); return; }
-        if(h != null && !(h >= 30 && h <= 130)){ toast('Taille entre 30 et 130 cm attendue'); return; }
-        if(hc != null && !(hc >= 25 && hc <= 60)){ toast('Périmètre crânien entre 25 et 60 cm attendu'); return; }
+        if(w == null && h == null && hc == null){ refuse('Indique au moins une mesure'); return; }
+        if(w != null && !(w >= 1 && w <= 30)){ refuse('Poids entre 1 et 30 kg attendu'); return; }
+        if(h != null && !(h >= 30 && h <= 130)){ refuse('Taille entre 30 et 130 cm attendue'); return; }
+        if(hc != null && !(hc >= 25 && hc <= 60)){ refuse('Périmètre crânien entre 25 et 60 cm attendu'); return; }
         const prev = S.events.filter(e => e.type === 'growth' && e.w != null && (!existing || e.id !== existing.id) && e.start < d.start).sort((a,b) => b.start - a.start)[0];
         if(w != null && prev && (w < prev.w * 0.9 || (d.start - prev.start < 30 * DAY && w > prev.w * 1.25))
           && !confirm('Le poids passe de ' + fmtNum(prev.w, 2) + ' kg à ' + fmtNum(w, 2) + ' kg. Est-ce bien exact ?')) return;
@@ -998,12 +1062,12 @@ function openEditor(id, preset){
         if(h != null) clean.h = Math.round(h * 10) / 10;
         if(hc != null) clean.hc = Math.round(hc * 10) / 10;
       }
-      if((t === 'med' || t === 'note') && !d.note){ toast(t === 'med' ? 'Indique le nom du médicament' : 'Écris ta note'); return; }
+      if((t === 'med' || t === 'note') && !d.note){ refuse(t === 'med' ? 'Indique le nom du médicament' : 'Écris ta note'); return; }
       if(d.note) clean.note = d.note;
       if(existing){ const i = S.events.findIndex(e => e.id === existing.id); S.events[i] = {id: existing.id, ...clean}; touch(S.events[i]); }
       else addEvent(clean);
       closeModal();
-      toast(eventInfo(clean).main + (existing ? ' : corrigé' : ' : enregistré'));
+      fb('save'); toast(eventInfo(clean).main + (existing ? ' : corrigé' : ' : enregistré')); checkAch();
     };
   };
   draw();
@@ -1251,7 +1315,7 @@ async function startSync(fid){
         if(!document.querySelector('.overlay') && tab !== 'set') render();
       }
       if(applyRemote(S.events, changes, since, S.sync && S.sync.dirty)){
-        save();
+        save(); setTimeout(checkAch, 400);
         if(!document.querySelector('.overlay') && tab !== 'set') render();
         checkNotif();
       }
@@ -1445,6 +1509,183 @@ function growthHTML(){
     <p class="note">Les courbes de référence du carnet de santé ne sont pas affichées ici. C'est le pédiatre qui dit si la croissance est normale.</p>`;
 }
 
+// ---------- Sons doux et vibrations ----------
+// Sons synthétisés à la volée (pas de fichier à télécharger) : notes sinusoïdales courtes, filtrées.
+let AC = null, MASTER = null;
+function audio(){
+  if(!S.settings.sound) return null;
+  try{
+    if(!AC){
+      const C = window.AudioContext || window.webkitAudioContext; if(!C) return null;
+      AC = new C(); MASTER = AC.createGain();
+      const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3000;
+      MASTER.connect(lp); lp.connect(AC.destination);
+    }
+    if(AC.state === 'suspended') AC.resume();
+    MASTER.gain.value = isSoft() ? 0.3 : 0.75;
+    return AC;
+  }catch(e){ return null; }
+}
+const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
+// [note, départ (s), durée (s), glissé vers la note]
+const SOUNDS = {
+  save: [[72, 0, .18], [79, .07, .3]],
+  meal: [[74, 0, .14], [79, .06, .16], [83, .12, .32]],
+  diaper: [[64, 0, .16, 79]],
+  sleep: [[76, 0, .34], [72, .16, .38], [67, .32, .6]],
+  wake: [[67, 0, .22], [72, .1, .22], [76, .2, .4]],
+  tap: [[84, 0, .09]],
+  undo: [[74, 0, .24, 66]],
+  error: [[57, 0, .18], [55, .12, .28]],
+  boop: [[81, 0, .1, 88], [88, .1, .16, 83]],
+  achieve: [[72, 0, .4], [76, .09, .4], [79, .18, .4], [84, .27, .7], [88, .38, .9]]
+};
+function play(kind){
+  const ctx = audio(); if(!ctx || !SOUNDS[kind]) return;
+  const t0 = ctx.currentTime + .01, peak = kind === 'achieve' ? .08 : .11;
+  for(const [n, dt, d, glide] of SOUNDS[kind]){
+    const at = t0 + dt;
+    for(const [mult, lvl, len] of [[1, peak, d], [2, peak * .15, d * .55]]){
+      if(kind === 'error' && mult === 2) continue;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = kind === 'error' ? 'triangle' : 'sine';
+      o.frequency.setValueAtTime(NOTE(n) * mult, at);
+      if(glide) o.frequency.exponentialRampToValueAtTime(NOTE(glide) * mult, at + len * .8);
+      g.gain.setValueAtTime(.0001, at); g.gain.exponentialRampToValueAtTime(lvl, at + .012); g.gain.exponentialRampToValueAtTime(.0001, at + len);
+      o.connect(g); g.connect(MASTER); o.start(at); o.stop(at + len + .05);
+    }
+  }
+}
+const VIB = {save: 12, meal: 12, diaper: 12, sleep: [10, 40, 10], wake: [10, 40, 10], tap: 8, undo: 10, error: [30, 40, 30], boop: 10, achieve: [15, 50, 15, 50, 30]};
+function fb(kind){ play(kind); try{ if(S.settings.haptic && navigator.vibrate) navigator.vibrate(VIB[kind] || 10); }catch(e){} }
+function refuse(msg){ toast(msg, null, null, 'error'); fb('error'); }
+
+// Les animations en boucle gardent leur rythme quand l'écran est redessiné (toutes les 30 s).
+function syncAnims(){
+  if(!document.getAnimations) return;
+  const now = performance.now();
+  for(const a of document.getAnimations()){
+    try{ if(a.effect && a.effect.getComputedTiming().iterations === Infinity) a.currentTime = now; }catch(e){}
+  }
+}
+
+// ---------- Le doudou vivant ----------
+function doudouMood(p, now){
+  if(p.state === 'night') return ['asleep', 'Bonne nuit… je fais de beaux rêves'];
+  if(p.state === 'sleeping') return ['asleep', 'Chut… je fais ma sieste'];
+  if(p.state === 'noref') return ['awake', 'Bonjour ! Note mon réveil du matin'];
+  if(now < p.from - 20 * MIN) return ['awake', 'Je suis en pleine forme !'];
+  if(now < p.from) return ['sleepy', 'Je commence à fatiguer…'];
+  if(now <= p.to) return ['yawn', p.bedtime ? "Je bâille… c'est l'heure du dodo" : "Je bâille… c'est l'heure de la sieste"];
+  return ['sleepy', 'Je suis très fatigué…'];
+}
+function doudouSVG(mood){
+  const ink = '#4a22b5';
+  const eyes = mood === 'asleep' || mood === 'yawn'
+    ? `<path d="M43.5 64q4 3.6 8 0M58.6 64q4 3.6 8 0" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>`
+    : mood === 'sleepy'
+    ? `<g class="dd-eyes"><ellipse cx="47.5" cy="65" rx="3" ry="1.9" fill="${ink}"/><ellipse cx="62.6" cy="65" rx="3" ry="1.9" fill="${ink}"/></g><path d="M43.8 62.6h7.4M58.9 62.6h7.4" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/>`
+    : `<g class="dd-eyes"><ellipse cx="47.5" cy="64" rx="3" ry="3.8" fill="${ink}"/><ellipse cx="62.6" cy="64" rx="3" ry="3.8" fill="${ink}"/><circle cx="48.5" cy="62.6" r="1.1" fill="#fff"/><circle cx="63.6" cy="62.6" r="1.1" fill="#fff"/></g>`;
+  const mouth = mood === 'yawn' ? `<ellipse class="dd-mouth" cx="55.3" cy="76" rx="3.2" ry="3.6" fill="${ink}"/>`
+    : mood === 'sleepy' ? `<ellipse cx="55.3" cy="75.6" rx="2.1" ry="1.7" fill="${ink}"/>`
+    : `<path d="M52 74.5q3.3 2.7 6.6 0" fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
+  const star = (x, y, r, o, k) => `<path class="dd-star" style="animation-delay:-${k}s" d="M${x} ${y - r}l${r * .28} ${r * .72} ${r * .72} ${r * .28}-${r * .72} ${r * .28}-${r * .28} ${r * .72}-${r * .28}-${r * .72}-${r * .72}-${r * .28} ${r * .72}-${r * .28}z" fill="#fff" opacity="${o}"/>`;
+  return `<svg viewBox="0 0 120 120" class="dd ${mood}" aria-hidden="true"><defs>
+    <linearGradient id="ddsky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9a6bff"/><stop offset=".55" stop-color="#6a35e0"/><stop offset="1" stop-color="#3a168f"/></linearGradient>
+    <clipPath id="ddclip"><circle cx="60" cy="66" r="36"/></clipPath></defs>
+    <rect width="120" height="120" rx="30" fill="url(#ddsky)"/>
+    ${star(101, 22, 7, 1, 0)}${star(17, 34, 4, .8, 1.2)}${star(104, 100, 3.5, .7, 2.1)}
+    <g class="dd-body"><circle cx="34" cy="38" r="12" fill="#fff"/><circle cx="34" cy="38" r="6.2" fill="#e6d8ff"/>
+    <circle cx="86" cy="38" r="12" fill="#e9dcff"/><circle cx="86" cy="38" r="6.2" fill="#cdb6ff"/>
+    <circle cx="60" cy="66" r="36" fill="#dccbff"/><circle cx="46" cy="59" r="36" fill="#fff" clip-path="url(#ddclip)"/>
+    <circle cx="42" cy="73" r="4.8" fill="#f2a3d3" opacity=".75"/><circle cx="68" cy="73" r="4.8" fill="#f2a3d3" opacity=".75"/>
+    ${eyes}${mouth}</g></svg>`;
+}
+
+// ---------- Badges ----------
+const ACH = [
+  {id: 'nap1', ic: 'moon', title: 'Première sieste', desc: 'Noter une première sieste', ok: c => c.naps >= 1},
+  {id: 'night1', ic: 'night', title: 'Première nuit', desc: 'Noter une nuit complète', ok: c => c.nights >= 1},
+  {id: 'window1', ic: 'spark', title: "Pile à l'heure", desc: 'Démarrer une sieste dans le créneau conseillé', ok: c => c.hits >= 1},
+  {id: 'window10', ic: 'spark', title: "Chef d'orchestre", desc: '10 siestes démarrées dans le créneau', ok: c => c.hits >= 10},
+  {id: 'night6', ic: 'night', title: 'Nuit de 6 heures', desc: "6 h d'affilée sans réveil noté", ok: c => c.bestNight >= 6 * H},
+  {id: 'night8', ic: 'night', title: 'Nuit de 8 heures', desc: "8 h d'affilée sans réveil noté", ok: c => c.bestNight >= 8 * H},
+  {id: 'nap50', ic: 'moon', title: '50 siestes', desc: '50 siestes notées', ok: c => c.naps >= 50},
+  {id: 'meal100', ic: 'bottle', title: '100 repas', desc: '100 repas notés', ok: c => c.meals >= 100},
+  {id: 'diaper100', ic: 'drop', title: '100 couches', desc: '100 couches changées', ok: c => c.diapers >= 100},
+  {id: 'learned', ic: 'spark', title: 'Rythme appris', desc: 'Doudodo connaît le rythme de bébé', ok: c => c.learned()},
+  {id: 'week1', ic: 'sun', title: 'Une semaine ensemble', desc: '7 jours de suivi', ok: c => c.days >= 7},
+  {id: 'month1', ic: 'sun', title: 'Un mois ensemble', desc: '30 jours de suivi', ok: c => c.days >= 30},
+  {id: 'grow1', ic: 'ruler', title: 'Première mesure', desc: 'Noter une première mesure de croissance', ok: c => c.growth >= 1}
+];
+function achCounts(now){
+  const c = {naps: 0, nights: 0, meals: 0, diapers: 0, growth: 0, bestNight: 0, hits: S.settings.hits || 0, days: 0};
+  let first = Infinity;
+  const wakes = S.events.filter(e => e.type === 'nwake').map(e => e.start);
+  for(const e of S.events){
+    if(e.type === 'nap') c.naps++; else if(e.type === 'bottle') c.meals++; else if(e.type === 'diaper') c.diapers++; else if(e.type === 'growth') c.growth++;
+    if(['nap', 'night', 'bottle', 'diaper'].includes(e.type)) first = Math.min(first, e.start);
+    if(e.type === 'night' && e.end){
+      c.nights++;
+      const pts = [e.start, ...wakes.filter(w => w > e.start && w < e.end), e.end].sort((a,b) => a - b);
+      for(let i = 1; i < pts.length; i++) c.bestNight = Math.max(c.bestNight, pts[i] - pts[i - 1]);
+    }
+  }
+  c.days = first < Infinity ? (now - first) / DAY : 0;
+  c.learned = () => learnInfo(now).pct >= 100;
+  return c;
+}
+// Mois-anniversaire : « Léa a 5 mois aujourd'hui ! »
+function monthiversary(now){
+  if(!S.child.birth) return null;
+  const b = new Date(S.child.birth + 'T00:00:00'), d = new Date(now);
+  if(isNaN(b)) return null;
+  const dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  if(d.getDate() !== Math.min(b.getDate(), dim)) return null;
+  const m = (d.getFullYear() - b.getFullYear()) * 12 + d.getMonth() - b.getMonth();
+  if(m < 1) return null;
+  const txt = m % 12 === 0 ? (m / 12) + (m === 12 ? ' an' : ' ans') : m + ' mois';
+  return {id: 'age' + m, ic: 'heart', title: childName().replace(/^./, x => x.toUpperCase()) + ' a ' + txt + " aujourd'hui !", desc: 'Joyeux anniversaire, petit trésor'};
+}
+let achQueue = [], achShowing = false;
+function checkAch(){
+  const now = Date.now(), c = achCounts(now), mv = monthiversary(now);
+  if(!S.settings.ach){   // première fois : on garde ce qui est déjà acquis sans le fêter
+    S.settings.ach = {};
+    for(const a of ACH) if(a.ok(c)) S.settings.ach[a.id] = now;
+    if(mv) S.settings.ach[mv.id] = now;
+    save(); return;
+  }
+  const fresh = ACH.filter(a => !S.settings.ach[a.id] && a.ok(c));
+  if(mv && !S.settings.ach[mv.id]) fresh.push(mv);
+  if(!fresh.length) return;
+  for(const a of fresh) S.settings.ach[a.id] = now;
+  save();
+  for(const a of fresh){
+    achQueue.push(a);
+    if(document.hidden && notifState() === 'granted') showNotif('Nouveau badge : ' + a.title, a.desc);
+  }
+  if(!achShowing) nextAch();
+}
+function nextAch(){
+  const a = achQueue.shift();
+  if(!a){ achShowing = false; return; }
+  achShowing = true;
+  const el = document.createElement('div'); el.className = 'ach'; el.setAttribute('role', 'status');
+  el.innerHTML = `<span class="medal">${icon(a.ic)}${Array.from({length: 12}, (_, i) => `<i class="spark" style="--a:${i * 30}deg;animation-delay:${(i % 3) * .06}s"></i>`).join('')}</span>
+    <div><small>Nouveau badge</small><b>${esc(a.title)}</b><span class="d">${esc(a.desc)}</span></div>`;
+  const close = () => { if(el.classList.contains('out')) return; el.classList.add('out'); setTimeout(() => { el.remove(); setTimeout(nextAch, 250); }, 350); };
+  el.onclick = close;
+  document.body.appendChild(el); fb('achieve');
+  setTimeout(close, 5200);
+}
+function badgesHTML(){
+  const got = S.settings.ach || {}, n = ACH.filter(a => got[a.id]).length;
+  const short = t => new Date(t).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'});
+  return `<h2>Badges</h2><p class="sub">${n} badge${n > 1 ? 's' : ''} sur ${ACH.length}. Chaque mois-anniversaire est fêté aussi.</p>
+    <div class="badges">${ACH.map(a => `<div class="badge${got[a.id] ? ' on' : ''}"><span class="medal">${icon(a.ic)}</span><b>${esc(a.title)}</b><small>${got[a.id] ? 'Obtenu le ' + short(got[a.id]) : esc(a.desc)}</small></div>`).join('')}</div>`;
+}
+
 // ---------- Actions ----------
 function act(el){
   const a = el.dataset.act, now = Date.now();
@@ -1452,25 +1693,28 @@ function act(el){
   if(a === 'tab'){ tab = el.dataset.tab; if(tab === 'log') viewDay = startOfDay(now); render(); window.scrollTo(0, 0); }
   else if(a === 'startnap' || a === 'startnight'){
     const type = a === 'startnap' ? 'nap' : 'night';
-    if(findOpen(S.events, 'nap', now, 12) || findOpen(S.events, 'night', now, 18)){ toast('Un sommeil est déjà en cours'); render(); return; }
-    const id = addEvent({type, start: now, end: null}); render();
-    toast((type === 'nap' ? 'Sieste démarrée à ' : 'Nuit démarrée à ') + fmtT(now), undoAdd(id));
+    if(findOpen(S.events, 'nap', now, 12) || findOpen(S.events, 'night', now, 18)){ refuse('Un sommeil est déjà en cours'); render(); return; }
+    const pb = predict(S.events, now, S.child.birth);
+    const hit = type === 'nap' && pb.state === 'awake' && !pb.bedtime && now >= pb.from && now <= pb.to;
+    if(hit){ S.settings.hits = (S.settings.hits || 0) + 1; save(); }
+    const id = addEvent({type, start: now, end: null}); render(); fb('sleep');
+    toast((type === 'nap' ? 'Sieste démarrée à ' : 'Nuit démarrée à ') + fmtT(now) + (hit ? ', pile dans le créneau' : ''), () => { delEvent(id); if(hit){ S.settings.hits--; save(); } });
   }
   else if(a === 'endnap' || a === 'endnight'){
     const open = a === 'endnap' ? findOpen(S.events, 'nap', now, 12) : findOpen(S.events, 'night', now, 18);
     if(open){
-      open.end = Math.max(now, open.start + MIN); touch(open); render();
+      open.end = Math.max(now, open.start + MIN); touch(open); render(); fb('wake');
       toast((a === 'endnap' ? 'Sieste terminée à ' : 'Nuit terminée, réveil à ') + fmtT(open.end), () => { open.end = null; touch(open); });
     }
   }
-  else if(a === 'nwake'){ const id = addEvent({type: 'nwake', start: now, end: null}); render(); toast('Réveil nocturne noté à ' + fmtT(now), undoAdd(id)); }
-  else if(a === 'wake'){ const id = addEvent({type: 'wake', start: now}); render(); toast('Réveil enregistré à ' + fmtT(now), undoAdd(id)); }
-  else if(a === 'diaper'){ const id = addEvent({type: 'diaper', start: now, kind: el.dataset.kind}); render(); toast(diaperLabel(el.dataset.kind) + ' noté à ' + fmtT(now), undoAdd(id)); }
+  else if(a === 'nwake'){ const id = addEvent({type: 'nwake', start: now, end: null}); render(); fb('tap'); toast('Réveil nocturne noté à ' + fmtT(now), undoAdd(id)); }
+  else if(a === 'wake'){ const id = addEvent({type: 'wake', start: now}); render(); fb('wake'); toast('Réveil enregistré à ' + fmtT(now), undoAdd(id)); }
+  else if(a === 'diaper'){ const id = addEvent({type: 'diaper', start: now, kind: el.dataset.kind}); render(); fb('diaper'); toast(diaperLabel(el.dataset.kind) + ' noté à ' + fmtT(now), undoAdd(id)); }
   else if(a === 'bottle') openEditor(null, {type: 'bottle', lock: true});
   else if(a === 'meal'){
     const kind = el.dataset.kind, id = addEvent({type: 'bottle', kind, start: now}); render();
     const what = {bottle: 'Biberon noté à ', breast: 'Tétée notée à ', solid: 'Repas solide noté à '}[kind] || 'Repas noté à ';
-    toast(what + fmtT(now), undoAdd(id), {label: kind === 'bottle' ? 'Quantité' : 'Détails', fn: () => openEditor(id)});
+    fb('meal'); toast(what + fmtT(now), undoAdd(id));
   }
   else if(a === 'add') openEditor(null, {type: el.dataset.type, day: el.dataset.day ? +el.dataset.day : null, lock: !!el.dataset.lock});
   else if(a === 'edit') openEditor(el.dataset.id);
@@ -1479,8 +1723,11 @@ function act(el){
   else if(a === 'notif') toggleNotif();
   else if(a === 'install'){ if(installEvt){ installEvt.prompt(); installEvt.userChoice.then(() => { installEvt = null; render(); }); } }
   else if(a === 'hideinstall'){ S.settings.hideInstall = true; save(); render(); }
-  else if(a === 'theme'){ S.settings.theme = el.dataset.v; save(); render(); }
-  else if(a === 'soft'){ S.settings.soft = el.dataset.v; save(); render(); }
+  else if(a === 'theme'){ S.settings.theme = el.dataset.v; save(); render(); fb('tap'); }
+  else if(a === 'sound'){ S.settings.sound = !S.settings.sound; save(); render(); if(S.settings.sound){ fb('save'); toast('Sons activés'); } else toast('Sons désactivés'); }
+  else if(a === 'haptic'){ S.settings.haptic = !S.settings.haptic; save(); render(); fb('tap'); toast(S.settings.haptic ? 'Vibrations activées' : 'Vibrations désactivées'); }
+  else if(a === 'doudou'){ const sv = el.querySelector('svg'); if(sv){ sv.classList.remove('wiggle'); void sv.getBoundingClientRect(); sv.classList.add('wiggle'); } fb('boop'); }
+  else if(a === 'soft'){ S.settings.soft = el.dataset.v; save(); render(); fb('tap'); }
   else if(a === 'reload') location.reload();
   else if(a === 'syncnow'){ checkUpdate(0); if(S.sync && syncAvailable()) startSync(S.sync.fid).then(() => { toast('Synchronisation relancée'); if(tab === 'set') render(); }); }
   else if(a === 'exportjson') download('doudodo-sauvegarde-' + toInput(now).slice(0, 10) + '.json', 'application/json', JSON.stringify({child: S.child, events: S.events}, null, 1));
@@ -1494,12 +1741,12 @@ function act(el){
   else if(a === 'synccopy'){ navigator.clipboard.writeText(S.sync.fid).then(() => toast('Code copié'), () => prompt('Copie ce code :', S.sync.fid)); }
   else if(a === 'syncshare'){ navigator.share({text: 'Code Doudodo : ' + S.sync.fid}).catch(() => {}); }
   else if(a === 'wipe'){
-    if(S.sync){ toast("Quitte d'abord le foyer pour tout effacer"); return; }
+    if(S.sync){ refuse("Quitte d'abord le foyer pour tout effacer"); return; }
     if(confirm('Effacer TOUTES les données de ce téléphone ? Pense à télécharger une sauvegarde avant.') && confirm('Vraiment tout effacer ?')){
       S = {child: {name: '', birth: ''}, events: [], settings: S.settings}; save(); render();
     }
   }
-  checkNotif();
+  checkNotif(); checkAch();
 }
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-act]');
@@ -1519,7 +1766,7 @@ document.addEventListener('change', ev => {
 });
 
 // Rafraîchit l'accueil, vérifie les rappels, fait la copie automatique du jour.
-function tick(){ if(tab === 'home' && !document.querySelector('.overlay')) render(); checkNotif(); autoSnapshot(); checkUpdate(60 * MIN); }
+function tick(){ if(tab === 'home' && !document.querySelector('.overlay')) render(); checkNotif(); autoSnapshot(); checkUpdate(60 * MIN); checkAch(); }
 setInterval(tick, 30000);
 // Au retour sur l'appli après plus d'une minute, on relance l'écoute du foyer : sur mobile, la connexion
 // peut rester figée après une mise en veille et l'écran ne recevrait plus les saisies de l'autre téléphone.
@@ -1539,6 +1786,7 @@ if(!S.child.birth && S.events.length === 0 && !S.sync){ tab = 'set'; render(); t
 if(S.sync && syncAvailable()) startSync(S.sync.fid);
 checkNotif();
 setTimeout(() => checkUpdate(0), 4000);
+setTimeout(checkAch, 1200);
 
 // Mode hors ligne / installation (uniquement quand la page est servie en http ou https)
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
