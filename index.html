@@ -139,8 +139,7 @@ h2{font-size:18px;margin:26px 0 6px;font-weight:800}
 .bval{position:absolute;left:0;right:0;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
 
 .rows{padding:2px 6px}
-.row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 6px;border-bottom:1px solid var(--line)}
-.row:last-child{border-bottom:none}
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 6px}
 .row .d{flex:1;min-width:0;font-size:16px;font-weight:700;overflow-wrap:anywhere}
 .row .d small{display:block;color:var(--muted);font-weight:400;font-size:14px}
 .row .d small.bad{color:var(--late);font-weight:700}
@@ -357,6 +356,24 @@ textarea{min-height:90px;resize:vertical}
 .onb-dots i.on{background:#fff;width:20px}
 .onb-code{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28);font-size:18px;margin-top:16px}
 :root.soft .onb{background:linear-gradient(165deg,#1a1236,#0b0719);color:#c9bdf0}
+
+/* Glisser pour supprimer */
+.swipe{position:relative;overflow:hidden;border-bottom:1px solid var(--line);max-height:220px;border-radius:12px}
+.swipe:last-child{border-bottom:none}
+.swipe .row{position:relative;z-index:1;background:var(--card);touch-action:pan-y;transition:transform .22s ease;user-select:none;-webkit-user-select:none}
+.swipe.dragging .row{transition:none}
+.swipe-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-right:18px;font-weight:800;font-size:15px;color:#fff;background:color-mix(in srgb,var(--late) 55%,var(--card));transition:background .15s}
+.swipe-bg svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.swipe.armed .swipe-bg{background:var(--late)}
+.swipe.gone{animation:rowgone .28s ease .2s forwards}
+@keyframes rowgone{to{max-height:0;opacity:0;border-bottom-width:0}}
+
+/* Journée particulière */
+.card.atyp{padding:12px 14px}
+.card.atyp.on{border-color:var(--wake);box-shadow:0 0 22px -10px var(--wake)}
+.card.atyp .chips{margin-top:10px}
+.atyp-dot{display:inline-block;width:8px;height:8px;margin-left:5px;border-radius:2px;transform:rotate(45deg);background:var(--wake);vertical-align:1px}
+.legend .atyp-dot{margin:0 6px 0 2px}
 </style>
 </head>
 <body>
@@ -424,12 +441,16 @@ function wstats(arr){
   const vr = arr.reduce((s,x) => s + x.w * (x.v - mean) ** 2, 0) / sw;
   return {mean, sd: Math.sqrt(vr), n: arr.length};
 }
+// Journées particulières (maladie, vaccin, voyage…) : notées par une note de type « atypical »
+const atypDays = events => new Set(events.filter(e => e.type === 'note' && e.kind === 'atypical').map(e => startOfDay(e.start)));
 function buildModel(events, now, age){
-  const days = groupByDay(events), today = startOfDay(now);
+  const days = groupByDay(events), today = startOfDay(now), atyp = atypDays(events);
   const wins = [], durs = [], napCounts = [], bedWins = [], bedClocks = [], wakeClocks = [];
+  let skipped = 0;
   for(const [ds, g] of days){
     const ago = Math.round((today - ds) / DAY);
     if(ago < 0 || ago > 21) continue;
+    if(atyp.has(ds)){ if(ago > 0) skipped++; continue; }
     const w = Math.pow(0.9, ago);
     g.naps.forEach((n, i) => {
       const rank = Math.min(i + 1, 5);
@@ -466,7 +487,8 @@ function buildModel(events, now, age){
     bed: blend(bedWins, lerpTable(age, 1) * 1.2, 20),
     bedClock: bc && bc.n >= 3 ? {mean: bc.mean, n: bc.n} : {mean: DEFAULT_BED_CLOCK, n: 0},
     wakeClock: wc && wc.n >= 3 ? wc.mean : null,
-    typicalNaps: nc && nc.n >= 3 ? Math.max(1, Math.round(nc.mean)) : Math.round(lerpTable(age, 2))
+    typicalNaps: nc && nc.n >= 3 ? Math.max(1, Math.round(nc.mean)) : Math.round(lerpTable(age, 2)),
+    skipped
   };
 }
 function findOpen(events, type, now, maxHours){
@@ -518,7 +540,8 @@ function predict(events, now, birth){
 }
 // Fiabilité : pour chaque sieste passée, on recalcule ce que l'appli aurait conseillé avec les seules données d'avant.
 function accuracy(events, now, birth){
-  const naps = events.filter(e => e.type === 'nap' && e.start < now && e.start > now - 10 * DAY).sort((a,b) => b.start - a.start).slice(0, 30);
+  const atyp = atypDays(events);
+  const naps = events.filter(e => e.type === 'nap' && e.start < now && e.start > now - 10 * DAY && !atyp.has(startOfDay(e.start))).sort((a,b) => b.start - a.start).slice(0, 30);
   let n = 0, sum = 0, hit = 0;
   for(const nap of naps){
     const p = predict(events.filter(e => e.start < nap.start), nap.start - 1, birth);
@@ -531,7 +554,7 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
-const APP_VERSION = '2026.11.18-4';
+const APP_VERSION = '2026.11.18-5';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
@@ -594,6 +617,7 @@ const IC = {
   temp: '<path d="M12 3a2 2 0 0 0-2 2v9.300a4 4 0 1 0 4 0V5a2 2 0 0 0-2-2z"/><path d="M12 9v6"/>',
   note: '<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5M8 9h8M8 13h4"/>',
   users: '<circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c.8-3.600 3.400-5.500 6.500-5.500s5.700 1.900 6.500 5.500"/><circle cx="17" cy="9" r="2.800"/><path d="M15.500 14.600c2.800.2 5 2 5.600 5.400"/>',
+  trash: '<path d="M4 7h16M9 7V4.500h6V7M6.500 7l1 13h9l1-13M10 11v6M14 11v6"/>',
   bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.500 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
   list: '<path d="M8 6h13M8 12h13M8 18h13M3.500 6h.01M3.500 12h.01M3.500 18h.01"/>',
   ruler: '<rect x="2.500" y="8" width="19" height="8" rx="1.500"/><path d="M6.500 8v3M10.500 8v4M14.500 8v3M18.500 8v4"/>',
@@ -626,13 +650,13 @@ function eventInfo(e){
   else if(e.type === 'med') r = {ic: 'pill', cls: 'med', main: 'Médicament', sub: ''};
   else if(e.type === 'temp') r = {ic: 'temp', cls: 'temp', main: 'Température : ' + String(e.val).replace('.', ',') + ' °C', sub: e.val >= 38 ? 'Fièvre (38 °C ou plus)' : ''};
   else if(e.type === 'growth') r = {ic: 'ruler', cls: 'growth', main: 'Mesure : ' + growthText(e), sub: ''};
-  else if(e.type === 'note') r = {ic: 'note', cls: 'note', main: 'Note', sub: ''};
+  else if(e.type === 'note') r = {ic: 'note', cls: 'note', main: e.kind === 'atypical' ? 'Journée particulière' : 'Note', sub: ''};
   else r = {ic: 'note', cls: 'note', main: e.type, sub: ''};
   if(e.note) r.sub = r.sub ? r.sub + '. ' + e.note : e.note;
   return r;
 }
 function eventsOfDay(ds){
-  return S.events.filter(e => startOfDay(e.start) === ds).sort((a,b) => a.start - b.start);
+  return S.events.filter(e => startOfDay(e.start) === ds && !(e.type === 'note' && e.kind === 'atypical')).sort((a,b) => a.start - b.start);
 }
 function rowsHTML(list, emptyText){
   if(!list.length) return `<div class="empty">${emptyText || "Rien d'enregistré pour le moment."}</div>`;
@@ -640,10 +664,10 @@ function rowsHTML(list, emptyText){
   return list.map(e => {
     const i = eventInfo(e);
     const stale = !e.end && ((e.type === 'nap' && now - e.start > 4 * H) || (e.type === 'night' && now - e.start > 16 * H));
-    return `<button class="row" data-act="edit" data-id="${e.id}" aria-label="Modifier : ${esc(i.main)} à ${fmtT(e.start)}">
+    return `<div class="swipe"><div class="swipe-bg" aria-hidden="true">${icon('trash')}Supprimer</div><button class="row" data-act="edit" data-id="${e.id}" aria-label="Modifier : ${esc(i.main)} à ${fmtT(e.start)}">
       <span class="ic ${i.cls}">${icon(i.ic)}</span>
       <span class="d">${esc(i.main)}${i.sub ? `<small>${esc(i.sub)}</small>` : ''}${stale ? '<small class="bad">Heure de fin manquante, à corriger</small>' : ''}</span>
-      <span class="t">${e.type === 'growth' ? new Date(e.start).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}) : fmtT(e.start)}</span><span class="edit">Modifier</span></button>`;
+      <span class="t">${e.type === 'growth' ? new Date(e.start).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}) : fmtT(e.start)}</span><span class="edit">Modifier</span></button></div>`;
   }).join('');
 }
 
@@ -731,6 +755,7 @@ function skyHTML(p, now){
       : 'Calculé d\'après son âge. Doudodo affinera avec tes saisies.';
     if(p.adjMin <= -5) why += ` Avancé de ${-p.adjMin} min car la dernière sieste a été courte.`;
     if(p.adjMin >= 5) why += ` Retardé de ${p.adjMin} min car la dernière sieste a été longue.`;
+    if(atypMarker(startOfDay(now))) why += ' Journée particulière : horaires à prendre avec souplesse, elle ne compte pas dans l\'apprentissage.';
     const evening = new Date(now).getHours() >= 17;
     const second = p.bedtime ? '<button class="ghost" data-act="startnap">C\'est une sieste</button>'
       : evening ? '<button class="ghost" data-act="startnight">C\'est le coucher du soir</button>' : '';
@@ -870,10 +895,11 @@ function homeHTML(){
 
 function logHTML(){
   const list = eventsOfDay(viewDay), isToday = viewDay === startOfDay(Date.now());
-  return `<h1>Journal</h1><p class="sub">Du plus récent au plus ancien. Touche une ligne pour la corriger ou la supprimer.</p>
+  return `<h1>Journal</h1><p class="sub">Du plus récent au plus ancien. Touche une ligne pour la corriger, glisse-la vers la gauche pour la supprimer.</p>
     <div class="datenav"><button data-act="prevday">Jour précédent</button><div class="lbl">${esc(dayLabel(viewDay))}</div><button data-act="nextday"${isToday ? ' disabled' : ''}>Jour suivant</button></div>
     <div class="card">${clockHTML(viewDay, isToday ? predict(S.events, Date.now(), S.child.birth) : null)}${totalsHTML(viewDay)}</div>
     <div class="card rows">${rowsHTML(list.slice().reverse(), "Rien d'enregistré ce jour-là.")}</div>
+    ${atypCardHTML(viewDay)}
     <button class="btn" data-act="add" data-type="nap" data-day="${viewDay}">Ajouter un évènement oublié</button>`;
 }
 
@@ -890,7 +916,7 @@ function statsHTML(){
   const days = [];
   for(let i = 6; i >= 0; i--){ const d = new Date(today); d.setDate(d.getDate() - i); days.push(d.getTime()); }
   const lbl = ds => ds === today ? 'auj.' : new Date(ds).toLocaleDateString('fr-FR', {weekday: 'short', day: 'numeric'}).replace('.', '');
-  const week = days.map(ds => { const t = trackParts(ds, null); return `<span>${esc(lbl(ds))}</span><div class="trk mid">${t.mid}${t.ticks}</div>`; }).join('');
+  const week = days.map(ds => { const t = trackParts(ds, null); return `<span>${esc(lbl(ds))}${atypMarker(ds) ? '<i class="atyp-dot" title="Journée particulière"></i>' : ''}</span><div class="trk mid">${t.mid}${t.ticks}</div>`; }).join('');
   const sleep = days.map(ds => { const s = sleepInDay(ds, now), h = (s.nap + s.night) / 60;
     return {label: lbl(ds), text: h ? (Math.round(h * 10) / 10 + 'h').replace('.', ',') : '', parts: [{v: s.night, c: 'night'}, {v: s.nap, c: 'sleep'}]}; });
   const milk = days.map(ds => { const m = eventsOfDay(ds).filter(e => e.type === 'bottle'), ml = m.reduce((s,e) => s + (e.ml || 0), 0);
@@ -906,7 +932,7 @@ function statsHTML(){
   return `<h1>Stats</h1><p class="sub">Les 7 derniers jours de ${name}.</p>
     <h2>La semaine en un coup d'œil</h2>
     <div class="card"><div class="wk">${week}<span></span>${AXIS}</div>
-      <div class="legend"><span><i class="blk" style="background:var(--night)"></i>Nuit</span><span><i class="blk" style="background:var(--sleep)"></i>Sieste</span><span><i class="blk" style="background:var(--meal);width:3px"></i>Repas</span></div></div>
+      <div class="legend"><span><i class="blk" style="background:var(--night)"></i>Nuit</span><span><i class="blk" style="background:var(--sleep)"></i>Sieste</span><span><i class="blk" style="background:var(--meal);width:3px"></i>Repas</span>${days.some(atypMarker) ? '<span><i class="atyp-dot"></i>Journée particulière</span>' : ''}</div></div>
     <h2>Sommeil par jour</h2>
     <div class="card">${barsHTML(sleep)}
       <div class="legend"><span><i class="blk" style="background:var(--night)"></i>Nuit</span><span><i class="blk" style="background:var(--sleep)"></i>Siestes</span></div>
@@ -921,7 +947,7 @@ function statsHTML(){
     <h2>Ce que Doudodo a appris</h2>
     ${learnHTML(now)}
     <div class="card"><table><tr><th>Sieste</th><th>Éveil selon l'âge</th><th>Éveil observé</th><th>Durée de sieste</th></tr>${learn}</table>
-    <p class="note" style="margin:10px 0 0">L'éveil est le temps passé réveillé avant la sieste. Rythme actuel : ${model.typicalNaps} sieste${model.typicalNaps > 1 ? 's' : ''} par jour. Coucher du soir habituel : ${model.bedClock.n ? clock(model.bedClock.mean) : 'pas encore connu (19:30 par défaut)'}. Réveil du matin habituel : ${model.wakeClock != null ? clock(model.wakeClock) : 'pas encore connu'}.</p></div>`;
+    <p class="note" style="margin:10px 0 0">L'éveil est le temps passé réveillé avant la sieste. Rythme actuel : ${model.typicalNaps} sieste${model.typicalNaps > 1 ? 's' : ''} par jour. Coucher du soir habituel : ${model.bedClock.n ? clock(model.bedClock.mean) : 'pas encore connu (19:30 par défaut)'}. Réveil du matin habituel : ${model.wakeClock != null ? clock(model.wakeClock) : 'pas encore connu'}.${model.skipped ? ` ${model.skipped} journée${model.skipped > 1 ? 's' : ''} particulière${model.skipped > 1 ? 's' : ''} ignorée${model.skipped > 1 ? 's' : ''}.` : ''}</p></div>`;
 }
 
 function settingsHTML(){
@@ -1007,6 +1033,7 @@ function openEditor(id, preset){
   const base = preset.day ? Math.min(Date.now(), preset.day + 12 * H) : Date.now();
   const d = existing ? {...existing} : {type: preset.type || 'nap', start: base, end: null};
   fillDefaults(d);
+  if(d.type === 'note') d.atyp = !!atypMarker(startOfDay(d.start));
   const ov = document.createElement('div'); ov.className = 'overlay'; document.body.appendChild(ov);
   ov.addEventListener('click', ev => { if(ev.target === ov) closeModal(); });
   const q = s => ov.querySelector(s);
@@ -1038,7 +1065,10 @@ function openEditor(id, preset){
       <label>Poids en kg</label><input type="text" id="f_w" inputmode="decimal" value="${d.w != null ? fmtNum(d.w, 3) : ''}" placeholder="par exemple 6,24">
       <label>Taille en cm</label><input type="text" id="f_h" inputmode="decimal" value="${d.h != null ? fmtNum(d.h, 1) : ''}" placeholder="par exemple 62,5">
       <label>Périmètre crânien en cm</label><input type="text" id="f_hc" inputmode="decimal" value="${d.hc != null ? fmtNum(d.hc, 1) : ''}" placeholder="par exemple 41">`;
+    if(t === 'note') f += `<label>Notes rapides</label><div class="chips">${QUICK_NOTES.map(x => `<button class="chip${noteParts(d.note).includes(x) ? ' on' : ''}" data-qn="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
     f += `<label>${noteLabel}</label>` + (t === 'note' ? `<textarea id="f_note" maxlength="500">${esc(d.note || '')}</textarea>` : `<input type="text" id="f_note" maxlength="300" value="${esc(d.note || '')}"${t === 'med' ? ' placeholder="par exemple Doliprane 2,4 %, dose 6 kg"' : ''}>`);
+    if(t === 'note') f += `<div class="switch" style="margin-top:14px"><div><b>Journée particulière</b><span class="note">Elle ne comptera pas dans l'apprentissage du rythme.</span></div>
+      <button class="${d.atyp ? 'on' : ''}" data-atyp="1" role="switch" aria-checked="${!!d.atyp}" aria-label="Journée particulière"></button></div>`;
     ov.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><h3>${existing ? 'Corriger : ' + TYPE_LABEL[t].toLowerCase() : SHEET_TITLE[t]}</h3>
       ${existing || preset.lock ? '' : seg('t', Object.entries(TYPE_LABEL), t)}
       <label>${SPAN[t] ? (t === 'night' ? 'Coucher' : 'Début') : t === 'growth' ? 'Date de la mesure' : 'Heure'}</label><input type="datetime-local" id="f_start" value="${toInput(d.start)}">
@@ -1049,6 +1079,13 @@ function openEditor(id, preset){
     ov.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { sync(); d.type = b.dataset.t; d.kind = undefined; fillDefaults(d); draw(); });
     ov.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { sync(); d.kind = b.dataset.k; draw(); });
     ov.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { sync(); d.side = b.dataset.side; draw(); });
+    ov.querySelectorAll('[data-qn]').forEach(b => b.onclick = () => {
+      sync(); const x = b.dataset.qn, parts = noteParts(d.note), on = parts.includes(x);
+      d.note = (on ? parts.filter(p => p !== x) : parts.concat(x)).join(', ');
+      if(!on && ATYP_AUTO.includes(x)) d.atyp = true;
+      fb('tap'); draw();
+    });
+    ov.querySelectorAll('[data-atyp]').forEach(b => b.onclick = () => { sync(); d.atyp = !d.atyp; fb('tap'); draw(); });
     ov.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { sync(); d.ml = +b.dataset.q; draw(); });
     ov.querySelectorAll('[data-ml]').forEach(b => b.onclick = () => { sync(); d.ml = d.ml ? Math.max(0, d.ml + parseInt(b.dataset.ml)) : lastMl(); draw(); });
     ov.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { sync(); d.val = Math.round(((d.val || 37) + parseFloat(b.dataset.tv)) * 10) / 10; q('#f_val').value = d.val; });
@@ -1105,6 +1142,7 @@ function openEditor(id, preset){
       if(d.note) clean.note = d.note;
       if(existing){ const i = S.events.findIndex(e => e.id === existing.id); S.events[i] = {id: existing.id, ...clean}; touch(S.events[i]); }
       else addEvent(clean);
+      if(t === 'note' && d.atyp) setAtypical(startOfDay(d.start), true, noteParts(d.note).filter(x => ATYP_REASONS.includes(x)));
       closeModal();
       fb('save'); toast(eventInfo(clean).main + (existing ? ' : corrigé' : ' : enregistré')); checkAch();
     };
@@ -1769,7 +1807,7 @@ async function syncSleepNotif(){
 const TUTO = [
   {art: 'sun', title: 'Note le réveil du matin', text: "C'est le point de départ : Doudodo calcule ensuite le créneau idéal pour chaque sieste."},
   {art: 'tiles', title: 'Un appui pour tout noter', text: "Sieste, repas, couche : un appui enregistre à l'heure actuelle. Un message confirme, avec Annuler en cas d'erreur."},
-  {art: 'list', title: 'Corrige dans le journal', text: 'Une heure à changer, une quantité à ajouter ? Touche la ligne dans le journal.'},
+  {art: 'list', title: 'Corrige dans le journal', text: 'Une heure à changer, une quantité à ajouter ? Touche la ligne dans le journal. Glisse-la vers la gauche pour la supprimer.'},
   {art: 'doudou', title: 'Le doudou te guide', text: "Il est en forme, puis il fatigue, il bâille quand c'est l'heure… et il dort pendant la sieste."},
   {art: 'spark', title: 'Doudodo apprend', text: "Au début, les horaires viennent des repères de l'âge. Au fil des jours, ils s'adaptent au rythme de ton enfant."}
 ];
@@ -1852,6 +1890,68 @@ async function onbAct(k){
   drawOnb(); fb('tap');
 }
 
+// ---------- Journées particulières et notes rapides ----------
+const QUICK_NOTES = ['Pleure beaucoup', 'Grognon', 'Poussée dentaire', 'Vaccin', 'Malade', 'Fièvre', 'Nouvel aliment', 'Très calme', 'Belle journée'];
+const ATYP_REASONS = ['Malade', 'Fièvre', 'Vaccin', 'Poussée dentaire', 'Voyage', 'Autre'];
+const ATYP_AUTO = ['Poussée dentaire', 'Vaccin', 'Malade', 'Fièvre'];
+const noteParts = n => String(n || '').split(/,\s*/).map(x => x.trim()).filter(Boolean);
+const atypMarker = ds => S.events.find(e => e.type === 'note' && e.kind === 'atypical' && startOfDay(e.start) === ds);
+function setAtypical(ds, on, reasons){
+  const m = atypMarker(ds);
+  if(!on){ if(m) delEvent(m.id); return; }
+  if(!m){ addEvent({type: 'note', kind: 'atypical', start: Math.min(Date.now(), ds + 12 * H), note: (reasons || []).join(', ')}); return; }
+  if(reasons && reasons.length){ const cur = noteParts(m.note); reasons.forEach(r => { if(!cur.includes(r)) cur.push(r); }); m.note = cur.join(', '); touch(m); }
+}
+function atypCardHTML(ds){
+  const m = atypMarker(ds), on = !!m, sel = noteParts(m && m.note);
+  return `<div class="card atyp${on ? ' on' : ''}">
+    <div class="switch"><div><b>Journée particulière</b><span class="note">${on ? (sel.length ? esc(sel.join(', ')) + '. ' : '') + "Elle ne compte pas dans l'apprentissage." : "Maladie, vaccin, voyage… Elle ne comptera pas dans l'apprentissage."}</span></div>
+      <button class="${on ? 'on' : ''}" data-act="atyp" data-day="${ds}" role="switch" aria-checked="${on}" aria-label="Journée particulière"></button></div>
+    ${on ? `<div class="chips">${ATYP_REASONS.map(r => `<button class="chip${sel.includes(r) ? ' on' : ''}" data-act="atypr" data-day="${ds}" data-r="${esc(r)}">${esc(r)}</button>`).join('')}</div>` : ''}</div>`;
+}
+
+// ---------- Glisser une ligne vers la gauche pour la supprimer ----------
+let SWP = null, swipeEndedAt = 0;
+document.addEventListener('pointerdown', ev => {
+  const row = ev.target.closest('.swipe .row');
+  if(!row || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+  SWP = {row, wrap: row.parentElement, x0: ev.clientX, y0: ev.clientY, dx: 0, mode: null, id: ev.pointerId};
+});
+document.addEventListener('pointermove', ev => {
+  if(!SWP || ev.pointerId !== SWP.id) return;
+  const dx = ev.clientX - SWP.x0, dy = ev.clientY - SWP.y0;
+  if(!SWP.mode){
+    if(Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.3){ SWP.mode = 'h'; SWP.wrap.classList.add('dragging'); try{ SWP.row.setPointerCapture(ev.pointerId); }catch(e){} }
+    else if(Math.abs(dy) > 10){ SWP = null; return; }
+    else return;
+  }
+  SWP.dx = Math.min(0, dx);
+  SWP.row.style.transform = `translateX(${SWP.dx}px)`;
+  const armed = SWP.dx < -SWP.wrap.offsetWidth * .35;
+  if(armed !== SWP.wrap.classList.contains('armed')){ SWP.wrap.classList.toggle('armed', armed); if(armed) try{ if(S.settings.haptic && navigator.vibrate) navigator.vibrate(8); }catch(e){} }
+});
+function endSwipe(ev){
+  if(!SWP || ev.pointerId !== SWP.id) return;
+  const s = SWP; SWP = null;
+  if(s.mode !== 'h') return;
+  swipeEndedAt = Date.now();
+  s.wrap.classList.remove('dragging');
+  if(s.dx < -s.wrap.offsetWidth * .35){
+    s.row.style.transform = 'translateX(-105%)'; s.wrap.classList.add('gone');
+    const id = s.row.dataset.id; setTimeout(() => swipeDelete(id), 260);
+  } else { s.row.style.transform = ''; s.wrap.classList.remove('armed'); }
+}
+document.addEventListener('pointerup', endSwipe);
+document.addEventListener('pointercancel', endSwipe);
+function swipeDelete(id){
+  const ev = S.events.find(e => e.id === id);
+  if(!ev) return;
+  const copy = {...ev};
+  delEvent(id); render(); fb('undo');
+  toast(eventInfo(copy).main + ' : supprimé', () => { S.events.push(copy); save(); markDirty(copy.id, 'put'); checkAch(); });
+  checkAch();
+}
+
 // ---------- Actions ----------
 function act(el){
   const a = el.dataset.act, now = Date.now();
@@ -1896,6 +1996,11 @@ function act(el){
   else if(a === 'soft'){ S.settings.soft = el.dataset.v; save(); render(); fb('tap'); }
   else if(a === 'reload') location.reload();
   else if(a === 'tuto') openOnboarding('tuto');
+  else if(a === 'atyp'){ const ds = +el.dataset.day, on = !atypMarker(ds); setAtypical(ds, on, []); render(); fb(on ? 'save' : 'undo'); toast(on ? 'Journée marquée comme particulière' : 'Journée de nouveau normale'); }
+  else if(a === 'atypr'){
+    const ds = +el.dataset.day, m = atypMarker(ds), r = el.dataset.r;
+    if(m){ const cur = noteParts(m.note); m.note = (cur.includes(r) ? cur.filter(x => x !== r) : cur.concat(r)).join(', '); touch(m); render(); fb('tap'); }
+  }
   else if(a === 'syncnow'){ checkUpdate(0); if(S.sync && syncAvailable()) startSync(S.sync.fid).then(() => { toast('Synchronisation relancée'); if(tab === 'set') render(); }); }
   else if(a === 'exportjson') download('doudodo-sauvegarde-' + toInput(now).slice(0, 10) + '.json', 'application/json', JSON.stringify({child: S.child, events: S.events}, null, 1));
   else if(a === 'exportcsv') exportCSV();
@@ -1926,6 +2031,7 @@ function askNotifOnce(){
   }).catch(() => {});
 }
 document.addEventListener('click', ev => {
+  if(Date.now() - swipeEndedAt < 450 && ev.target.closest('.swipe')){ ev.preventDefault(); return; }
   const ob = ev.target.closest('[data-ob]');
   if(ob){ ev.preventDefault(); onbAct(ob.dataset.ob); return; }
   const el = ev.target.closest('[data-act]');
