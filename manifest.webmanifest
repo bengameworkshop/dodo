@@ -28,5 +28,55 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sieste : démarrer ou terminer",
+      "short_name": "Sieste",
+      "url": "./?do=sleep",
+      "icons": [
+        {
+          "src": "shortcut-sleep.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Noter un biberon",
+      "short_name": "Biberon",
+      "url": "./?do=meal-bottle",
+      "icons": [
+        {
+          "src": "shortcut-bottle.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Noter un pipi",
+      "short_name": "Pipi",
+      "url": "./?do=diaper-pee",
+      "icons": [
+        {
+          "src": "shortcut-pee.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Noter un caca",
+      "short_name": "Caca",
+      "url": "./?do=diaper-poop",
+      "icons": [
+        {
+          "src": "shortcut-poop.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

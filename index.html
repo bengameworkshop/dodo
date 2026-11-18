@@ -327,6 +327,36 @@ textarea{min-height:90px;resize:vertical}
 .badge b{font-size:15px;font-weight:800;line-height:1.2}
 .badge:not(.on) b{color:var(--muted)}
 .badge small{font-size:13px;color:var(--muted);line-height:1.3}
+
+/* Premier lancement et tuto */
+.onb{position:fixed;inset:0;z-index:60;color:#fff;overflow:auto;
+  background:radial-gradient(80% 50% at 85% 0%,rgba(214,190,255,.5),transparent 60%),linear-gradient(165deg,#7b4cf0,#4a1fc0 50%,#1d0f52);
+  padding:calc(12px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px))}
+.onb-in{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.onb-top{display:flex;justify-content:space-between;align-items:center;min-height:44px}
+.onb-link{color:#ece3ff;font-weight:700;padding:10px 4px}
+.onb-body{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:8px 0}
+.onb-body h2{font-size:28px;line-height:1.15;margin:26px 0 10px;font-weight:800;text-wrap:balance}
+.onb-body p{font-size:17px;color:#e6dcff;line-height:1.5;margin:0 auto;max-width:34ch}
+.onb-body label{color:#e6dcff;text-align:left;margin-top:16px}
+.onb-body input{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28);color:#fff;color-scheme:dark}
+.onb-body input::placeholder{color:rgba(255,255,255,.55)}
+.onb-art{display:flex;justify-content:center;gap:14px}
+.onb-medal{width:132px;height:132px;border-radius:50%;display:grid;place-items:center;color:#5b2fc7;background:radial-gradient(circle at 35% 30%,#fff,#ece2ff 60%,#c9b2ff);box-shadow:0 0 60px 10px rgba(255,255,255,.32);animation:onbfloat 4s ease-in-out infinite}
+.onb-medal svg{width:64px;height:64px;fill:currentColor;fill-opacity:.2;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.dd-art svg{width:150px;height:150px;border-radius:40px;box-shadow:0 0 70px 14px rgba(255,255,255,.28);animation:onbfloat 4s ease-in-out infinite}
+.tiles-art .ic{width:78px;height:78px;background:#fff;box-shadow:0 0 30px rgba(255,255,255,.35);animation:onbfloat 4s ease-in-out infinite}
+.tiles-art .ic:nth-child(2){animation-delay:-1.3s}.tiles-art .ic:nth-child(3){animation-delay:-2.6s}
+.tiles-art .ic svg{width:38px;height:38px}
+@keyframes onbfloat{50%{transform:translateY(-8px)}}
+.onb-actions{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.onb-actions .cta{margin-top:0}
+.onb-actions .ghost{flex:none;width:100%;margin:0}
+.onb-dots{display:flex;justify-content:center;gap:7px;margin-top:18px}
+.onb-dots i{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.35);transition:width .2s}
+.onb-dots i.on{background:#fff;width:20px}
+.onb-code{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28);font-size:18px;margin-top:16px}
+:root.soft .onb{background:linear-gradient(165deg,#1a1236,#0b0719);color:#c9bdf0}
 </style>
 </head>
 <body>
@@ -501,13 +531,14 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
-const APP_VERSION = '2026.11.18-2';
+const APP_VERSION = '2026.11.18-4';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
   try{ r = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
   if(!r || !Array.isArray(r.events)) r = {child: {name: '', birth: ''}, events: []};
-  r.settings = Object.assign({notif: false, lead: 15, theme: 'dark', soft: 'auto', sound: true, haptic: true}, r.settings || {});
+  r.settings = Object.assign({notif: true, lead: 15, theme: 'dark', soft: 'auto', sound: true, haptic: true}, r.settings || {});
+  if(!r.settings.notifDefault){ r.settings.notif = true; r.settings.notifDefault = 1; }   // rappels activés par défaut, y compris après mise à jour
   return r;
 }
 let S = load();
@@ -562,6 +593,9 @@ const IC = {
   pill: '<g transform="rotate(-45 12 12)"><rect x="3" y="8.500" width="18" height="7" rx="3.500"/><path d="M12 8.500v7"/></g>',
   temp: '<path d="M12 3a2 2 0 0 0-2 2v9.300a4 4 0 1 0 4 0V5a2 2 0 0 0-2-2z"/><path d="M12 9v6"/>',
   note: '<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5M8 9h8M8 13h4"/>',
+  users: '<circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c.8-3.600 3.400-5.500 6.500-5.500s5.700 1.900 6.500 5.500"/><circle cx="17" cy="9" r="2.800"/><path d="M15.500 14.600c2.800.2 5 2 5.600 5.400"/>',
+  bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.500 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3.500 6h.01M3.500 12h.01M3.500 18h.01"/>',
   ruler: '<rect x="2.500" y="8" width="19" height="8" rx="1.500"/><path d="M6.500 8v3M10.500 8v4M14.500 8v3M18.500 8v4"/>',
   spark: '<path d="M11 3l1.900 5.600 5.600 1.900-5.600 1.900L11 18l-1.900-5.600-5.600-1.900 5.600-1.900z"/><path d="M19 15v4M17 17h4"/>'
 };
@@ -934,6 +968,11 @@ function settingsHTML(){
       <button class="btn sec small" data-act="exportcsv">Exporter pour un tableur (CSV)</button>
       <input type="file" id="importfile" accept="application/json,.json" style="display:none">
     </div>
+    <h2>Aide</h2>
+    <div class="card">
+      <div class="note">Les principaux gestes de Doudodo en cinq écrans.</div>
+      <button class="btn sec small" data-act="tuto">Revoir le tutoriel</button>
+    </div>
     <h2>Zone sensible</h2>
     <div class="card">
       <div class="note">Efface le profil et les ${S.events.length} évènement${S.events.length > 1 ? 's' : ''} de ce téléphone. Impossible à annuler.</div>
@@ -1127,6 +1166,7 @@ function showNotif(title, body){
 }
 let notifTimer;
 function checkNotif(){
+  syncSleepNotif();
   clearTimeout(notifTimer);
   if(!S.settings.notif || notifState() !== 'granted') return;
   const now = Date.now(), p = predict(S.events, now, S.child.birth);
@@ -1686,6 +1726,132 @@ function badgesHTML(){
     <div class="badges">${ACH.map(a => `<div class="badge${got[a.id] ? ' on' : ''}"><span class="medal">${icon(a.ic)}</span><b>${esc(a.title)}</b><small>${got[a.id] ? 'Obtenu le ' + short(got[a.id]) : esc(a.desc)}</small></div>`).join('')}</div>`;
 }
 
+// ---------- Raccourcis et actions venues de la notification ----------
+function doAction(what){
+  if(!what) return;
+  const now = Date.now();
+  if(what === 'sleep'){
+    if(findOpen(S.events, 'night', now, 18)) what = 'endnight';
+    else if(findOpen(S.events, 'nap', now, 12)) what = 'endnap';
+    else { const p = predict(S.events, now, S.child.birth); what = p.state === 'awake' && p.bedtime ? 'startnight' : 'startnap'; }
+  }
+  const [a, kind] = what.split('-');
+  if(!['startnap', 'startnight', 'endnap', 'endnight', 'meal', 'diaper'].includes(a)) return;
+  if(a === 'endnap' && !findOpen(S.events, 'nap', now, 12)){ toast('Aucune sieste en cours'); return; }
+  if(a === 'endnight' && !findOpen(S.events, 'night', now, 18)){ toast('Aucune nuit en cours'); return; }
+  document.querySelectorAll('.overlay').forEach(o => o.remove());
+  tab = 'home';
+  act({dataset: {act: a, kind}, querySelector: () => null});
+}
+// Notification qui reste affichée pendant une sieste ou une nuit, avec un bouton pour la terminer
+let sleepNotifKey;
+async function syncSleepNotif(){
+  try{
+    if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+    const now = Date.now(), open = findOpen(S.events, 'night', now, 18) || findOpen(S.events, 'nap', now, 12);
+    const want = open && S.settings.notif && notifState() === 'granted';
+    const key = want ? open.id + '|' + open.start : null;
+    if(key === sleepNotifKey) return;
+    sleepNotifKey = key;
+    const reg = await navigator.serviceWorker.ready;
+    (await reg.getNotifications({tag: 'dodo-encours'})).forEach(n => n.close());
+    if(!want) return;
+    const night = open.type === 'night', p = predict(S.events, now, S.child.birth);
+    await reg.showNotification(night ? 'Nuit en cours' : 'Sieste en cours', {
+      body: (night ? 'Coucher à ' : 'Commencée à ') + fmtT(open.start) + (p.wakeAt ? '. Réveil habituel vers ' + fmtT(p.wakeAt) + '.' : '.'),
+      tag: 'dodo-encours', silent: true, requireInteraction: true, icon: 'icon-192.png', badge: 'icon-192.png',
+      actions: [{action: night ? 'endnight' : 'endnap', title: night ? 'Terminer la nuit' : 'Terminer la sieste'}]
+    });
+  }catch(e){ console.warn('Notification en cours', e); }
+}
+
+// ---------- Premier lancement et tuto ----------
+const TUTO = [
+  {art: 'sun', title: 'Note le réveil du matin', text: "C'est le point de départ : Doudodo calcule ensuite le créneau idéal pour chaque sieste."},
+  {art: 'tiles', title: 'Un appui pour tout noter', text: "Sieste, repas, couche : un appui enregistre à l'heure actuelle. Un message confirme, avec Annuler en cas d'erreur."},
+  {art: 'list', title: 'Corrige dans le journal', text: 'Une heure à changer, une quantité à ajouter ? Touche la ligne dans le journal.'},
+  {art: 'doudou', title: 'Le doudou te guide', text: "Il est en forme, puis il fatigue, il bâille quand c'est l'heure… et il dort pendant la sieste."},
+  {art: 'spark', title: 'Doudodo apprend', text: "Au début, les horaires viennent des repères de l'âge. Au fil des jours, ils s'adaptent au rythme de ton enfant."}
+];
+let OB = null;
+function openOnboarding(mode){
+  const steps = mode === 'tuto' ? [] : ['welcome'].concat(syncAvailable() ? ['share'] : [], ['child'], notifState() === 'default' ? ['notif'] : []);
+  OB = {mode, steps: steps.concat(TUTO.map((_, i) => 't' + i)), i: 0, joining: false};
+  drawOnb();
+}
+function closeOnb(){
+  document.querySelectorAll('.onb').forEach(x => x.remove());
+  OB = null; S.settings.onboarded = 1; save(); tab = 'home'; render(); window.scrollTo(0, 0);
+}
+function onbArt(a){
+  if(a === 'doudou') return `<div class="onb-art dd-art">${doudouSVG('yawn')}</div>`;
+  if(a === 'welcome') return `<div class="onb-art dd-art">${doudouSVG('awake')}</div>`;
+  if(a === 'tiles') return `<div class="onb-art tiles-art">${[['moon', 'sleep'], ['bottle', 'meal'], ['drop', 'pee']].map(([i, c]) => `<span class="ic ${c}">${icon(i)}</span>`).join('')}</div>`;
+  return `<div class="onb-art"><span class="onb-medal">${icon(a)}</span></div>`;
+}
+function drawOnb(){
+  let el = document.querySelector('.onb');
+  if(!el){ el = document.createElement('div'); el.className = 'onb'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); document.body.appendChild(el); }
+  const step = OB.steps[OB.i], n = OB.steps.length, last = OB.i === n - 1, tutoStep = step[0] === 't';
+  let body = '', actions = '';
+  if(step === 'welcome'){
+    body = `${onbArt('welcome')}<h2>Bienvenue dans Doudodo</h2><p>Doudodo t'aide à trouver le bon moment pour la sieste, et à noter repas et couches en un appui.</p>`;
+    actions = '<button class="cta" data-ob="next"><b>Commencer</b></button>';
+  } else if(step === 'share'){
+    if(S.sync){
+      body = `${onbArt('users')}<h2>Foyer partagé</h2><p>Envoie ce code à l'autre parent. Dans Doudodo, il touchera « J'ai un code » et le saisira.</p><div class="mono onb-code">${esc(S.sync.fid)}</div>`;
+      actions = `<button class="cta" data-ob="next"><b>Continuer</b></button>${navigator.share ? '<button class="ghost" data-act="syncshare">Envoyer le code</button>' : '<button class="ghost" data-act="synccopy">Copier le code</button>'}`;
+    } else if(OB.joining){
+      body = `${onbArt('users')}<h2>Rejoindre un foyer</h2><p>Saisis le code de 20 caractères reçu de l'autre parent.</p>
+        <label for="ob_code">Code du foyer</label><input type="text" id="ob_code" placeholder="xxxx-xxxx-xxxx-xxxx-xxxx" autocapitalize="off" autocomplete="off" spellcheck="false">`;
+      actions = '<button class="cta" data-ob="join"><b>Rejoindre ce foyer</b></button><button class="ghost" data-ob="nojoin">Retour</button>';
+    } else {
+      body = `${onbArt('users')}<h2>Vous êtes deux ?</h2><p>Partagez les mêmes données entre deux téléphones : ce que l'un note apparaît chez l'autre.</p>`;
+      actions = '<button class="cta" data-ob="create"><b>Créer un foyer partagé</b><small>Tu recevras un code à envoyer</small></button><button class="ghost" data-ob="joinform">J\'ai un code</button><button class="ghost" data-ob="next">Pas maintenant</button>';
+    }
+  } else if(step === 'child'){
+    body = `${onbArt('heart')}<h2>Ton enfant</h2><p>Sa date de naissance sert à choisir les premiers repères de sommeil.</p>
+      <label for="ob_name">Prénom</label><input type="text" id="ob_name" value="${esc(S.child.name)}" placeholder="Prénom" autocomplete="off">
+      <label for="ob_birth">Date de naissance</label><input type="date" id="ob_birth" value="${esc(S.child.birth)}">`;
+    actions = '<button class="cta" data-ob="child"><b>Continuer</b></button>';
+  } else if(step === 'notif'){
+    body = `${onbArt('bell')}<h2>Un rappel avant la sieste ?</h2><p>Doudodo te prévient ${S.settings.lead} minutes avant le créneau conseillé. Le téléphone va te demander l'autorisation.</p>`;
+    actions = '<button class="cta" data-ob="notif"><b>Activer les rappels</b></button><button class="ghost" data-ob="nonotif">Plus tard</button>';
+  } else {
+    const tt = TUTO[+step.slice(1)];
+    body = `${onbArt(tt.art)}<h2>${tt.title}</h2><p>${tt.text}</p>`;
+    actions = `<button class="cta" data-ob="${last ? 'done' : 'next'}"><b>${last ? "C'est parti" : 'Suivant'}</b></button>`;
+  }
+  el.innerHTML = `<div class="onb-in"><div class="onb-top">${OB.i > 0 && !OB.joining ? '<button class="onb-link" data-ob="back">Retour</button>' : '<span></span>'}${tutoStep && !last ? '<button class="onb-link" data-ob="done">Passer</button>' : '<span></span>'}</div>
+    <div class="onb-body">${body}</div><div class="onb-actions">${actions}</div>
+    <div class="onb-dots" aria-hidden="true">${OB.steps.map((_, k) => `<i class="${k === OB.i ? 'on' : ''}"></i>`).join('')}</div></div>`;
+  syncAnims();
+}
+async function onbAct(k){
+  if(!OB) return;
+  if(k === 'next') OB.i++;
+  else if(k === 'back'){ OB.i--; OB.joining = false; }
+  else if(k === 'joinform') OB.joining = true;
+  else if(k === 'nojoin') OB.joining = false;
+  else if(k === 'child'){
+    const nm = $('#ob_name').value.trim(), bd = $('#ob_birth').value;
+    if(!bd){ refuse('Indique sa date de naissance, tu pourras la changer plus tard'); return; }
+    S.child.name = nm; S.child.birth = bd; save(); syncProfile(); OB.i++;
+  }
+  else if(k === 'create'){ await createFamily(); if(!S.sync) return; }
+  else if(k === 'join'){ await joinFamily($('#ob_code').value); if(!S.sync) return; OB.joining = false; OB.i++; }
+  else if(k === 'notif'){
+    S.settings.notif = true; S.settings.notifAsked = true; save();
+    try{ const r = await Notification.requestPermission(); if(r !== 'granted') toast('Rappels refusés : tu pourras les autoriser plus tard'); }catch(e){}
+    OB.i++;
+  }
+  else if(k === 'nonotif'){ S.settings.notifAsked = true; save(); OB.i++; }
+  else if(k === 'done'){ closeOnb(); fb('save'); return; }
+  if(!OB) return;
+  OB.i = Math.max(0, Math.min(OB.steps.length - 1, OB.i));
+  drawOnb(); fb('tap');
+}
+
 // ---------- Actions ----------
 function act(el){
   const a = el.dataset.act, now = Date.now();
@@ -1729,6 +1895,7 @@ function act(el){
   else if(a === 'doudou'){ const sv = el.querySelector('svg'); if(sv){ sv.classList.remove('wiggle'); void sv.getBoundingClientRect(); sv.classList.add('wiggle'); } fb('boop'); }
   else if(a === 'soft'){ S.settings.soft = el.dataset.v; save(); render(); fb('tap'); }
   else if(a === 'reload') location.reload();
+  else if(a === 'tuto') openOnboarding('tuto');
   else if(a === 'syncnow'){ checkUpdate(0); if(S.sync && syncAvailable()) startSync(S.sync.fid).then(() => { toast('Synchronisation relancée'); if(tab === 'set') render(); }); }
   else if(a === 'exportjson') download('doudodo-sauvegarde-' + toInput(now).slice(0, 10) + '.json', 'application/json', JSON.stringify({child: S.child, events: S.events}, null, 1));
   else if(a === 'exportcsv') exportCSV();
@@ -1747,8 +1914,20 @@ function act(el){
     }
   }
   checkNotif(); checkAch();
+  // Rappels : l'autorisation du téléphone est demandée une seule fois, lors d'une première saisie
+  if(['startnap', 'startnight', 'endnap', 'endnight', 'wake', 'nwake', 'meal', 'diaper'].includes(a)) askNotifOnce();
+}
+function askNotifOnce(){
+  if(!S.settings.notif || S.settings.notifAsked || notifState() !== 'default') return;
+  S.settings.notifAsked = true; save();
+  Notification.requestPermission().then(r => {
+    if(r === 'granted'){ setTimeout(() => toast('Rappels activés : je te préviens ' + S.settings.lead + ' min avant la sieste'), 1800); checkNotif(); }
+    if(tab === 'set') render();
+  }).catch(() => {});
 }
 document.addEventListener('click', ev => {
+  const ob = ev.target.closest('[data-ob]');
+  if(ob){ ev.preventDefault(); onbAct(ob.dataset.ob); return; }
   const el = ev.target.closest('[data-act]');
   if(el){ ev.preventDefault(); act(el); }
 });
@@ -1782,7 +1961,14 @@ window.addEventListener('pageshow', e => { if(e.persisted) resume(true); });
 
 autoSnapshot();
 render();
-if(!S.child.birth && S.events.length === 0 && !S.sync){ tab = 'set'; render(); toast('Commence par indiquer la date de naissance'); }
+if(!S.settings.onboarded){
+  if(S.events.length === 0 && !S.sync) openOnboarding('full');
+  else { S.settings.onboarded = 1; save(); }
+}
+// Raccourcis de l'icône et bouton de la notification : ./?do=...
+const qsDo = new URLSearchParams(location.search).get('do');
+if(qsDo){ try{ history.replaceState(null, '', location.pathname); }catch(e){} if(S.settings.onboarded) setTimeout(() => doAction(qsDo), 250); }
+if('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if(e.data && e.data.do) doAction(e.data.do); });
 if(S.sync && syncAvailable()) startSync(S.sync.fid);
 checkNotif();
 setTimeout(() => checkUpdate(0), 4000);
