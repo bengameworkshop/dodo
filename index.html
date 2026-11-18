@@ -501,7 +501,7 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
-const APP_VERSION = '2026.11.18-1';
+const APP_VERSION = '2026.11.18-2';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
@@ -1531,7 +1531,7 @@ const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
 const SOUNDS = {
   save: [[72, 0, .18], [79, .07, .3]],
   meal: [[74, 0, .14], [79, .06, .16], [83, .12, .32]],
-  diaper: [[64, 0, .16, 79]],
+  diaper: [[69, 0, .2, 84], [81, .1, .2]],
   sleep: [[76, 0, .34], [72, .16, .38], [67, .32, .6]],
   wake: [[67, 0, .22], [72, .1, .22], [76, .2, .4]],
   tap: [[84, 0, .09]],
@@ -1604,9 +1604,9 @@ function doudouSVG(mood){
 
 // ---------- Badges ----------
 const ACH = [
-  {id: 'nap1', ic: 'moon', title: 'Première sieste', desc: 'Noter une première sieste', ok: c => c.naps >= 1},
-  {id: 'night1', ic: 'night', title: 'Première nuit', desc: 'Noter une nuit complète', ok: c => c.nights >= 1},
-  {id: 'window1', ic: 'spark', title: "Pile à l'heure", desc: 'Démarrer une sieste dans le créneau conseillé', ok: c => c.hits >= 1},
+  {id: 'nap1', ic: 'moon', title: 'Première sieste', desc: 'Une première sieste notée', ok: c => c.naps >= 1},
+  {id: 'night1', ic: 'night', title: 'Première nuit', desc: 'Une nuit complète notée', ok: c => c.nights >= 1},
+  {id: 'window1', ic: 'spark', title: "Pile à l'heure", desc: 'Une sieste démarrée dans le créneau conseillé', ok: c => c.hits >= 1},
   {id: 'window10', ic: 'spark', title: "Chef d'orchestre", desc: '10 siestes démarrées dans le créneau', ok: c => c.hits >= 10},
   {id: 'night6', ic: 'night', title: 'Nuit de 6 heures', desc: "6 h d'affilée sans réveil noté", ok: c => c.bestNight >= 6 * H},
   {id: 'night8', ic: 'night', title: 'Nuit de 8 heures', desc: "8 h d'affilée sans réveil noté", ok: c => c.bestNight >= 8 * H},
@@ -1616,7 +1616,7 @@ const ACH = [
   {id: 'learned', ic: 'spark', title: 'Rythme appris', desc: 'Doudodo connaît le rythme de bébé', ok: c => c.learned()},
   {id: 'week1', ic: 'sun', title: 'Une semaine ensemble', desc: '7 jours de suivi', ok: c => c.days >= 7},
   {id: 'month1', ic: 'sun', title: 'Un mois ensemble', desc: '30 jours de suivi', ok: c => c.days >= 30},
-  {id: 'grow1', ic: 'ruler', title: 'Première mesure', desc: 'Noter une première mesure de croissance', ok: c => c.growth >= 1}
+  {id: 'grow1', ic: 'ruler', title: 'Première mesure', desc: 'Une première mesure de croissance notée', ok: c => c.growth >= 1}
 ];
 function achCounts(now){
   const c = {naps: 0, nights: 0, meals: 0, diapers: 0, growth: 0, bestNight: 0, hits: S.settings.hits || 0, days: 0};
