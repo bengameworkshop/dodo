@@ -528,15 +528,20 @@ function predict(events, now, birth){
   }
   let center = ref + mean * MIN;
   const bedTs = startOfDay(now) + model.bedClock.mean * MIN;
-  const bedtime = center > bedTs - 45 * MIN || (rank > model.typicalNaps && center > bedTs - 150 * MIN);
+  // Rien de noté depuis longtemps (siestes à la crèche, oubli) : le créneau calculé serait loin dans le passé.
+  const stale = now - center > 90 * MIN;
+  const bedtime = center > bedTs - 45 * MIN || (rank > model.typicalNaps && center > bedTs - 150 * MIN) || (stale && now > bedTs - 3 * H);
   if(bedtime){
     basis = model.bed; adjMin = 0;
-    center = ref + basis.mean * MIN;
-    if(model.bedClock.n >= 3) center = (center + bedTs) / 2;
-  }
+    if(stale) center = Math.max(bedTs, now);
+    else {
+      center = ref + basis.mean * MIN;
+      if(model.bedClock.n >= 3) center = (center + bedTs) / 2;
+    }
+  } else if(stale){ center = now + 10 * MIN; adjMin = 0; }
   const spread = Math.min(25, Math.max(10, basis.sd * 0.8)) * MIN;
   return {state: 'awake', age, ref, rank, center, from: center - spread, to: center + spread,
-    bedtime, typicalNaps: model.typicalNaps, w: basis, adjMin};
+    bedtime, typicalNaps: model.typicalNaps, w: basis, adjMin, stale};
 }
 // Fiabilité : pour chaque sieste passée, on recalcule ce que l'appli aurait conseillé avec les seules données d'avant.
 function accuracy(events, now, birth){
@@ -554,7 +559,7 @@ function accuracy(events, now, birth){
 // </LOGIC>
 
 // ---------- Stockage ----------
-const APP_VERSION = '2026.11.18-6';
+const APP_VERSION = '2026.11.18-7';
 const KEY = 'dodo.v1', BAK = 'dodo.bak';
 function load(){
   let r = null;
@@ -573,6 +578,9 @@ function touch(e){ save(); markDirty(e.id, 'put'); }
 
 // ---------- Helpers ----------
 const $ = s => document.querySelector(s);
+// Fin de journée et heure « d'horloge » : justes aussi les jours de changement d'heure (23 h ou 25 h)
+const dayEnd = ds => startOfDay(ds + 30 * H);
+const clockH = (ds, t) => { if(t <= ds) return 0; if(t >= dayEnd(ds)) return 24; const d = new Date(t); return d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600; };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2, '0');
 const fmtT = ts => new Date(ts).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
@@ -756,6 +764,7 @@ function skyHTML(p, now){
     if(p.adjMin <= -5) why += ` Avancé de ${-p.adjMin} min car la dernière sieste a été courte.`;
     if(p.adjMin >= 5) why += ` Retardé de ${p.adjMin} min car la dernière sieste a été longue.`;
     if(atypMarker(startOfDay(now))) why += ' Journée particulière : horaires à prendre avec souplesse, elle ne compte pas dans l\'apprentissage.';
+    if(p.stale) why = `Aucun sommeil noté depuis ${fmtT(p.ref)}. Si ${name} a dormi ailleurs (crèche, voiture, poussette…), ajoute ces siestes dans le journal pour des horaires justes.`;
     const evening = new Date(now).getHours() >= 17;
     const second = p.bedtime ? '<button class="ghost" data-act="startnap">C\'est une sieste</button>'
       : evening ? '<button class="ghost" data-act="startnight">C\'est le coucher du soir</button>' : '';
@@ -780,15 +789,15 @@ function skyHTML(p, now){
 // Frise d'une journée de 0 h à 24 h : sommeil au centre, repas au-dessus, couches en dessous.
 function trackParts(ds, p){
   const now = Date.now(), isToday = ds === startOfDay(now);
-  const x = t => 100 * (Math.min(ds + DAY, Math.max(ds, t)) - ds) / DAY;
+  const x = t => 100 * clockH(ds, t) / 24;
   const blk = (cls, a, b) => `<i class="${cls}" style="left:${x(a).toFixed(2)}%;width:${Math.max(0, x(b) - x(a)).toFixed(2)}%"></i>`;
   const dot = (t, c) => `<i class="dot" style="left:${x(t).toFixed(2)}%;background:var(--${c})"></i>`;
   let top = '', mid = '', bot = '', ticks = '';
   for(const e of S.events){
     if(e.type === 'nap' || e.type === 'night'){
       const end = e.end || (now - e.start < 18 * H ? now : e.start + 30 * MIN);
-      if(e.start < ds + DAY && end > ds) mid += blk(e.type === 'nap' ? 'nap' : 'ngt', e.start, end);
-    } else if(e.start >= ds && e.start < ds + DAY){
+      if(e.start < dayEnd(ds) && end > ds) mid += blk(e.type === 'nap' ? 'nap' : 'ngt', e.start, end);
+    } else if(e.start >= ds && e.start < dayEnd(ds)){
       if(e.type === 'bottle'){ top += dot(e.start, 'meal'); ticks += `<i class="tick" style="left:${x(e.start).toFixed(2)}%"></i>`; }
       else if(e.type === 'diaper') bot += dot(e.start, e.kind === 'pee' ? 'pee' : 'poop');
     }
@@ -807,16 +816,16 @@ function arcPath(r, a0, a1){
 }
 function clockHTML(ds, p){
   const now = Date.now(), isToday = ds === startOfDay(now);
-  const ang = t => 360 * (Math.min(ds + DAY, Math.max(ds, t)) - ds) / DAY;
+  const ang = t => 15 * clockH(ds, t);
   let arcs = '', dots = '', meals = 0, diapers = 0;
   for(const e of S.events){
     if(e.type === 'nap' || e.type === 'night'){
       const open = !e.end && now - e.start < (e.type === 'nap' ? 12 : 18) * H;
       const end = e.end || (open ? now : e.start + 30 * MIN);
-      if(e.start >= ds + DAY || end <= ds) continue;
+      if(e.start >= dayEnd(ds) || end <= ds) continue;
       const a0 = ang(e.start), a1 = Math.max(ang(end), a0 + 1.5);
       arcs += `<path d="${arcPath(112, a0, a1)}" class="${e.type === 'nap' ? 'cnap' : 'cngt'}${open ? ' live' : ''}"/>`;
-    } else if(e.start >= ds && e.start < ds + DAY){
+    } else if(e.start >= ds && e.start < dayEnd(ds)){
       if(e.type === 'bottle'){ const [x, y] = polar(139, ang(e.start)); dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.5" fill="var(--meal)"/>`; meals++; }
       else if(e.type === 'diaper'){ const [x, y] = polar(86, ang(e.start)); dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="var(--${e.kind === 'pee' ? 'pee' : 'poop'})"/>`; diapers++; }
     }
@@ -846,7 +855,7 @@ function sleepInDay(ds, now){
   for(const e of S.events){
     if(e.type !== 'nap' && e.type !== 'night') continue;
     const end = e.end || (now - e.start < 18 * H ? now : e.start);
-    const d = Math.min(end, ds + DAY) - Math.max(e.start, ds);
+    const d = Math.min(end, dayEnd(ds)) - Math.max(e.start, ds);
     if(d > 0){ if(e.type === 'nap') nap += d; else night += d; }
   }
   return {nap: nap / MIN, night: night / MIN};
@@ -1157,11 +1166,12 @@ function download(name, mime, text){
   a.download = name; document.body.appendChild(a); a.click(); a.remove();
 }
 function exportCSV(){
+  const fr = v => v == null ? '' : String(v).replace('.', ',');
   const loc = t => t ? new Date(t - new Date(t).getTimezoneOffset() * MIN).toISOString().slice(0, 19) : '';
   const cell = v => /[;"\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
   const rows = [['type', 'debut', 'fin', 'duree_min', 'ml', 'detail', 'valeur', 'poids_kg', 'taille_cm', 'perimetre_cranien_cm', 'note']];
   S.events.slice().sort((a,b) => a.start - b.start).forEach(e => rows.push([
-    e.type, loc(e.start), loc(e.end), e.end ? Math.round((e.end - e.start) / MIN) : '', e.ml ?? '', [e.kind, e.side].filter(Boolean).join(' '), e.val ?? '', e.w ?? '', e.h ?? '', e.hc ?? '', e.note ?? '']));
+    e.type, loc(e.start), loc(e.end), e.end ? Math.round((e.end - e.start) / MIN) : '', fr(e.ml), [e.kind, e.side].filter(Boolean).join(' '), fr(e.val), fr(e.w), fr(e.h), fr(e.hc), e.note ?? '']));
   download('doudodo.csv', 'text/csv', '﻿' + rows.map(r => r.map(cell).join(';')).join('\n'));
 }
 function importData(j, what){
@@ -1208,7 +1218,7 @@ function checkNotif(){
   clearTimeout(notifTimer);
   if(!S.settings.notif || notifState() !== 'granted') return;
   const now = Date.now(), p = predict(S.events, now, S.child.birth);
-  if(p.state !== 'awake') return;
+  if(p.state !== 'awake' || p.stale) return;
   const at = p.from - S.settings.lead * MIN, key = p.ref + '|' + p.rank + '|' + (p.bedtime ? 'b' : 'n');
   if(now < at){ notifTimer = setTimeout(checkNotif, Math.min(at - now + 500, 2147480000)); return; }
   if(now <= p.to && S.settings.lastNotif !== key){
